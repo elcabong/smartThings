@@ -14,7 +14,8 @@
 metadata {
  	definition (name: "webCoRE Value Ties - Contact Sensor Group", namespace: "mbarone/apps", author: "mbarone") {
     capability "Contact Sensor"
-	capability "Sensor"  	
+	capability "Sensor"
+	capability "Switch"
  	capability "Health Check"
 
     
@@ -46,6 +47,8 @@ metadata {
     command "changeValue"
     command "open"
     command "close"
+    command "On"
+    command "Off"	
     }
  	tiles(scale: 2){		
     	valueTile("Main", "device.Main", width: 6, height: 4) {
@@ -54,7 +57,7 @@ metadata {
 		}		
         standardTile("Refresh", "device.switch", inactiveLabel: false, width: 2, height: 1, decoration: "flat", wordWrap: true) {
             state "off", action:"On", label: "Refresh", icon:"st.secondary.refresh"
-            state "on", label: "Refreshing", icon:"st.motion.motion.active"
+            state "on", action:"Off", label: "Refreshing", icon:"st.motion.motion.active"
         }
         standardTile("Details", "device.Details", inactiveLabel: false, width: 4, height: 1, decoration: "flat", wordWrap: true) {
             state "default", label:'${currentValue}'
@@ -159,3 +162,9 @@ def close() {
 	log.trace "close()"
     sendEvent(name: "contact", value: "closed")
 }
+ def On(){
+ 	sendEvent(name: "switch", value: "on")
+ }
+ def Off(){
+ 	sendEvent(name: "switch", value: "off")
+ }
