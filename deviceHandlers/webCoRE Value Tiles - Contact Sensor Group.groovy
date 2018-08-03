@@ -45,6 +45,7 @@ metadata {
     command "changeMain"
     command "changeDetails"
     command "changeValue"
+	command "clearValues"
     command "open"
     command "close"
     command "On"
@@ -62,48 +63,55 @@ metadata {
         standardTile("Details", "device.Details", inactiveLabel: false, width: 4, height: 1, decoration: "flat", wordWrap: true) {
             state "default", label:'${currentValue}'
         }		
-        valueTile("image", "image", width: 1, height: 1) {
- 			state("default", label:'', icon: "st.alarm.temperature.normal")
- 		}
         valueTile("Value0", "device.Value0", width: 1, height: 1) {
  			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00A0DC")
 			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
+			state("")
  		}		
  		valueTile("Value1", "device.Value1", width: 1, height: 1) {
  			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00A0DC")
 			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
+			state("")
  		}
  		valueTile("Value2", "device.Value2", width: 1, height: 1) {
  			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00A0DC")
 			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
+			state("")
  		}
  		valueTile("Value3", "device.Value3", width: 1, height: 1) {
  			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00A0DC")
 			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
+			state("")
  		}
  		valueTile("Value4", "device.Value4", width: 1, height: 1) {
  			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00A0DC")
 			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
+			state("")
  		}
  		valueTile("Value5", "device.Value5", width: 1, height: 1) {
  			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00A0DC")
 			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
+			state("")
  		}
         valueTile("Value6", "device.Value6", width: 1, height: 1) {
  			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00A0DC")
 			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
+			state("")
  		}
         valueTile("Value7", "device.Value7", width: 1, height: 1) {
  			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00A0DC")
 			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
+			state("")
  		}
         valueTile("Value8", "device.Value8", width: 1, height: 1) {
  			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00A0DC")
 			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
+			state("")
  		}
         valueTile("Value9", "device.Value9", width: 1, height: 1) {
  			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00A0DC")
 			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
+			state("")
  		}
         valueTile("Title0", "device.Title0", width: 5, height: 1) {
  			state( "default", label:'${currentValue}')
@@ -136,8 +144,8 @@ metadata {
  			state( "default", label:'${currentValue}')
  		}
  		main(["Main"])
- 		details(["Main","Refresh","Details","Title0","Value0","Title1","Value1","Title2","Value2","Title3","Value3","Title4","Value4","Title5","Value5","Title6","Value6","Title7","Value7","Title8","Value8","Title9","Value9"])
- 	}
+		details(["Main","Refresh","Details","Title0","Value0","Title1","Value1","Title2","Value2","Title3","Value3","Title4","Value4","Title5","Value5","Title6","Value6","Title7","Value7","Title8","Value8","Title9","Value9"])
+	}
  }
  def parse(String description){
  	def pair = description.split(":")
@@ -148,10 +156,18 @@ metadata {
  }
  def changeDetails (param){
  	sendEvent("name":"Details", "value":param)
- } 
+ }
  def changeValue (num, title, param) {
  	sendEvent("name":"Value"+num, "value":param)
     sendEvent("name":"Title"+num, "value":title)
+ }
+ def clearValues (startingAt){
+	startingAt = startingAt as Integer
+	def myIntRange = startingAt..9
+	for(i in myIntRange){
+		sendEvent("name":"Value"+i, "value":"")
+		sendEvent("name":"Title"+i, "value":"")		
+	}
  }
  def open() {
 	log.trace "open()"
