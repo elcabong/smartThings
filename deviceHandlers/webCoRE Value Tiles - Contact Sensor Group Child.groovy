@@ -44,11 +44,11 @@ metadata {
 
 }
 
-def parse(String name, String value) {
+def parse(String description) {
     //log.trace "parse(${description}) called"
-	//def parts = description.split(":")
-    //def name  = parts.length>0?parts[0].trim():null
-    //def value = parts.length>1?parts[1].trim():null
+	def parts = description.split(" ")
+    def name  = parts.length>0?parts[0].trim():null
+    def value = parts.length>1?parts[1].trim():null
     if (name && value) {
     	log.trace "name: "+name+", value:"+value
         // Update device

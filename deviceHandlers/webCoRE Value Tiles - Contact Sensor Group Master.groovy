@@ -48,7 +48,7 @@ metadata {
 		// details(["Main","Refresh","Details","Title0","Value0","Title1","Value1","Title2","Value2","Title3","Value3","Title4","Value4","Title5","Value5","Title6","Value6","Title7","Value7","Title8","Value8","Title9","Value9"])
 		childDeviceTiles("All")
 		main(["Main"])
-		details(["Main","Details","All"])
+		details(["Main","Refresh","Details","All"])
 	}
  }
  def parse(String description){
@@ -67,14 +67,16 @@ metadata {
 	
 	
 	def childDevice = null
-	
+	def name = title
+	def value = param
+	def deviceType = "contact"
 	try {
 		childDevices.each {
 			try{
 				log.debug "1-Looking for child with deviceNetworkID = ${device.deviceNetworkId}-${name} against ${it.deviceNetworkId}"
 				if (it.deviceNetworkId == "${device.deviceNetworkId}-${name}") {
 				childDevice = it
-				log.debug "Found a match!!!"
+				log.debug "Found a match 1!!!"
 				}
 			}
 			catch (e) {
@@ -84,19 +86,18 @@ metadata {
 	
 	
 		if (childDevice == null) {
-			def namebase = "contact"
 			def namenum = num
 			log.debug "isChild = true, but no child found - Auto Add it!"
-			log.debug "    Need a ${namebase} with id = ${namenum}"
+			log.debug "    Need a ${name}"
 		
-			createChildDevice(namebase, namenum)
+			createChildDevice(name)
 			//find child again, since it should now exist!
 			childDevices.each {
 				try{
-					//log.debug "2-Looking for child with deviceNetworkID = ${device.deviceNetworkId}-${name} against ${it.deviceNetworkId}"
+					log.debug "2-Looking for child with deviceNetworkID = ${device.deviceNetworkId}-${name} against ${it.deviceNetworkId}"
 					if (it.deviceNetworkId == "${device.deviceNetworkId}-${name}") {
 						childDevice = it
-						log.debug "Found a match!!!"
+						log.debug "Found a match 2!!!"
 					}
 				}
 				catch (e) {
@@ -106,9 +107,10 @@ metadata {
 		}
 
 		if (childDevice != null) {
-            //log.debug "parse() found child device ${childDevice.deviceNetworkId}"
-            childDevice.parse("${namebase} ${value}")
-			log.debug "${childDevice.deviceNetworkId} - name: ${namebase}, value: ${value}"
+            log.debug "parse() found child device ${childDevice.deviceNetworkId}"
+			 log.debug "sending parse(${deviceType} ${value})"
+            childDevice.parse("${deviceType} ${value}")
+			log.debug "${childDevice.deviceNetworkId} - name: ${name} (contact), value: ${value}"
 		}
 		
 	}
@@ -119,19 +121,19 @@ metadata {
  }
  
  
- private void createChildDevice(String deviceName, String deviceNumber) {
-	log.trace "createChildDevice:  Creating Child Device '${device.displayName} (${deviceName}${deviceNumber})'"
+ private void createChildDevice(String deviceName) {
+	log.trace "createChildDevice:  Creating Child Device '${device.displayName} (${deviceName})'"
 	try {
 		def deviceHandlerName = "webCoRE Value Ties - Contact Sensor Group Child"
 		addChildDevice(deviceHandlerName,
-						"${device.deviceNetworkId}-${deviceName}${deviceNumber}",
+						"${device.deviceNetworkId}-${deviceName}",
 						null,
 						[
 							completedSetup: true, 
-							label: "${device.displayName} (${deviceName}${deviceNumber})", 
+							label: "${device.displayName} (${deviceName})", 
 							isComponent: true, 
-							componentName: "${deviceName}${deviceNumber}", 
-							componentLabel: "${deviceName} ${deviceNumber}"
+							componentName: "${deviceName}", 
+							componentLabel: "${deviceName}"
 						]
 					)	
 	}
@@ -146,8 +148,8 @@ metadata {
 	startingAt = startingAt as Integer
 	def myIntRange = startingAt..9
 	for(i in myIntRange){
-		sendEvent("name":"Value"+i, "value":"")
-		sendEvent("name":"Title"+i, "value":"")		
+		// sendEvent("name":"Value"+i, "value":"")
+		// sendEvent("name":"Title"+i, "value":"")		
 	}
  }
  def open() {
