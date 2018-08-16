@@ -24,7 +24,7 @@ metadata {
     
     command "changeMain"
     command "changeDetails"
-    command "changeValue"
+    command "changeChildValue"
 	command "clearValues"
     command "open"
     command "close"
@@ -47,6 +47,8 @@ metadata {
  		// main(["Main"])
 		// details(["Main","Refresh","Details","Title0","Value0","Title1","Value1","Title2","Value2","Title3","Value3","Title4","Value4","Title5","Value5","Title6","Value6","Title7","Value7","Title8","Value8","Title9","Value9"])
 		childDeviceTiles("All")
+		main(["Main"])
+		details(["Main","Details","All"])
 	}
  }
  def parse(String description){
@@ -59,10 +61,87 @@ metadata {
  def changeDetails (param){
  	sendEvent("name":"Details", "value":param)
  }
- def changeValue (num, title, param) {
- 	sendEvent("name":"Value"+num, "value":param)
-    sendEvent("name":"Title"+num, "value":title)
+ def changeChildValue (num, title, param) {
+ 	//sendEvent("name":"Value"+num, "value":param)
+    //sendEvent("name":"Title"+num, "value":title)
+	
+	
+	def childDevice = null
+	
+	try {
+		childDevices.each {
+			try{
+				log.debug "1-Looking for child with deviceNetworkID = ${device.deviceNetworkId}-${name} against ${it.deviceNetworkId}"
+				if (it.deviceNetworkId == "${device.deviceNetworkId}-${name}") {
+				childDevice = it
+				log.debug "Found a match!!!"
+				}
+			}
+			catch (e) {
+				log.debug e
+			}
+		}	
+	
+	
+		if (childDevice == null) {
+			def namebase = "contact"
+			def namenum = num
+			log.debug "isChild = true, but no child found - Auto Add it!"
+			log.debug "    Need a ${namebase} with id = ${namenum}"
+		
+			createChildDevice(namebase, namenum)
+			//find child again, since it should now exist!
+			childDevices.each {
+				try{
+					//log.debug "2-Looking for child with deviceNetworkID = ${device.deviceNetworkId}-${name} against ${it.deviceNetworkId}"
+					if (it.deviceNetworkId == "${device.deviceNetworkId}-${name}") {
+						childDevice = it
+						log.debug "Found a match!!!"
+					}
+				}
+				catch (e) {
+					log.debug e
+				}
+			}
+		}
+
+		if (childDevice != null) {
+            //log.debug "parse() found child device ${childDevice.deviceNetworkId}"
+            childDevice.parse("${namebase} ${value}")
+			log.debug "${childDevice.deviceNetworkId} - name: ${namebase}, value: ${value}"
+		}
+		
+	}
+	catch (e) {
+        log.error "Error in parse() routine, error = ${e}"
+	}	
+	
  }
+ 
+ 
+ private void createChildDevice(String deviceName, String deviceNumber) {
+	log.trace "createChildDevice:  Creating Child Device '${device.displayName} (${deviceName}${deviceNumber})'"
+	try {
+		def deviceHandlerName = "webCoRE Value Ties - Contact Sensor Group Child"
+		addChildDevice(deviceHandlerName,
+						"${device.deviceNetworkId}-${deviceName}${deviceNumber}",
+						null,
+						[
+							completedSetup: true, 
+							label: "${device.displayName} (${deviceName}${deviceNumber})", 
+							isComponent: true, 
+							componentName: "${deviceName}${deviceNumber}", 
+							componentLabel: "${deviceName} ${deviceNumber}"
+						]
+					)	
+	}
+	catch (e) {
+        log.error "Child device creation failed with error = ${e}"
+        state.alertMessage = "Child device creation failed. Please make sure that the '${deviceHandlerName}' is installed and published."
+	}
+ }
+ 
+ 
  def clearValues (startingAt){
 	startingAt = startingAt as Integer
 	def myIntRange = startingAt..9
