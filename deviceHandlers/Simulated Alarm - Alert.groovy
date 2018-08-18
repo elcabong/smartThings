@@ -72,6 +72,10 @@ def siren() {
 	sendEvent(name: "alarm", value: "siren")
 }
 
+def both() {
+	sendEvent(name: "alarm", value: "siren")
+}
+
 def off() {
 	sendEvent(name: "alarm", value: "off")
 }

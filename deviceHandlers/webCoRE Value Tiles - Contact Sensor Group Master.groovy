@@ -67,7 +67,7 @@ metadata {
 	sendEvent("name":"openDevices", "value":openDevices)
 	sendEvent("name":"Details", "value":details)
  }
- def changeChildValue (num, title, param) {
+ def changeChildValue (title, param) {
 	def childDevice = null
 	def name = title
 	def value = param
@@ -86,7 +86,6 @@ metadata {
 			}
 		}	
 		if (childDevice == null) {
-			def namenum = num
 			//log.debug "isChild = true, but no child found - Auto Add it!"
 			//log.debug "    Need a ${name}"
 		
