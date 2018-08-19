@@ -12,7 +12,7 @@
  *
  */
 metadata {
- 	definition (name: "webCoRE Value Ties - Contact Sensor Group Master", namespace: "mbarone/apps", author: "mbarone") {
+ 	definition (name: "webCoRE Value Ties - Contact Sensor Group Master", namespace: "mbarone/apps", author: "mbarone", vid:"generic-contact (contact, battery)") {
 		capability "Contact Sensor"
 		capability "Sensor"
 		capability "Switch"

@@ -23,9 +23,10 @@
  * 
  */
 metadata {
-	definition (name: "webCoRE Value Ties - Contact Sensor Group Child", namespace: "mbarone/apps", author: "mbarone") {
+	definition (name: "webCoRE Value Ties - Contact Sensor Group Child", namespace: "mbarone/apps", author: "mbarone", vid:"generic-contact (contact, battery)") {
 		capability "Contact Sensor"
 		capability "Sensor"
+		capability "Health Check"
 
 		attribute "lastUpdated", "String"
 	}
