@@ -21,20 +21,17 @@ metadata {
 		attribute "Details","string"
 		
 		command "changeMain"
-		command "changeDetails"
 		command "changeChildValue"
-		command "clearValues"
-		command "open"
-		command "close"
 		command "On"
 		command "Off"
 		command "removeChildren"
     }
 	
  	tiles(scale: 2){
+		/*
 		multiAttributeTile(name:"Main", type: "generic", width: 6, height: 4) {
 			tileAttribute ("temperature", key: "PRIMARY_CONTROL") {
-				state("default", label:'${currentValue}°', icon: "st.alarm.temperature.normal",
+				state("temperature", label:'${currentValue}°', icon: "st.alarm.temperature.normal",
 					backgroundColors:[
 						[value: 31, color: "#153591"],
 						[value: 44, color: "#1e9cbb"],
@@ -46,7 +43,20 @@ metadata {
 					]
 				)
 			}
-		}
+		}*/
+        standardTile("Main", "temperature", inactiveLabel: false, width: 6, height: 4, decoration: "flat", wordWrap: true) {
+            state("temperature", label:'${currentValue}°',
+				backgroundColors:[
+					[value: 31, color: "#153591"],
+					[value: 44, color: "#1e9cbb"],
+					[value: 59, color: "#90d2a7"],
+					[value: 74, color: "#44b621"],
+					[value: 84, color: "#f1d801"],
+					[value: 95, color: "#d04e00"],
+					[value: 96, color: "#bc2323"]
+				]
+			)
+        }		
         standardTile("Refresh", "device.switch", inactiveLabel: false, width: 2, height: 1, decoration: "flat", wordWrap: true) {
             state "off", action:"On", label: "Refresh", icon:"st.secondary.refresh"
             state "on", action:"Off", label: "Refreshing", icon:"st.motion.motion.active"
@@ -78,10 +88,10 @@ metadata {
 	try {
 		childDevices.each {
 			try{
-				//log.debug "1-Looking for child with deviceNetworkID = ${device.deviceNetworkId}-${name} against ${it.deviceNetworkId}"
+				log.debug "1-Looking for child with deviceNetworkID = ${device.deviceNetworkId}-${name} against ${it.deviceNetworkId}"
 				if (it.deviceNetworkId == "${device.deviceNetworkId}-${name}") {
 					childDevice = it
-					//log.debug "Found a match 1!!!"
+					log.debug "Found a match 1!!!"
 				}
 			}
 			catch (e) {
@@ -89,17 +99,17 @@ metadata {
 			}
 		}	
 		if (childDevice == null) {
-			//log.debug "isChild = true, but no child found - Auto Add it!"
-			//log.debug "    Need a ${name}"
+			log.debug "isChild = true, but no child found - Auto Add it!"
+			log.debug "    Need a ${name}"
 		
 			createChildDevice(name)
 			//find child again, since it should now exist!
 			childDevices.each {
 				try{
-					//log.debug "2-Looking for child with deviceNetworkID = ${device.deviceNetworkId}-${name} against ${it.deviceNetworkId}"
+					log.debug "2-Looking for child with deviceNetworkID = ${device.deviceNetworkId}-${name} against ${it.deviceNetworkId}"
 					if (it.deviceNetworkId == "${device.deviceNetworkId}-${name}") {
 						childDevice = it
-						//log.debug "Found a match 2!!!"
+						log.debug "Found a match 2!!!"
 					}
 				}
 				catch (e) {
@@ -108,10 +118,10 @@ metadata {
 			}
 		}
 		if (childDevice != null) {
-            //log.debug "parse() found child device ${childDevice.deviceNetworkId}"
-			//log.debug "sending parse(${deviceType} ${value})"
+            log.debug "parse() found child device ${childDevice.deviceNetworkId}"
+			log.debug "sending parse(${deviceType} ${value})"
             childDevice.parse("${deviceType} ${value}")
-			//log.debug "${childDevice.deviceNetworkId} - name: ${name} (contact), value: ${value}"
+			log.debug "${childDevice.deviceNetworkId} - name: ${name} (temperature), value: ${value}"
 		}
 	}
 	catch (e) {
@@ -121,7 +131,7 @@ metadata {
  private void createChildDevice(String deviceName) {
 	log.trace "createChildDevice:  Creating Child Device '${device.displayName} (${deviceName})'"
 	try {
-		def deviceHandlerName = "webCoRE Value Ties - Contact Sensor Group Child"
+		def deviceHandlerName = "webCoRE Value Tiles - Ave Temperature Group Child"
 		addChildDevice(deviceHandlerName,
 						"${device.deviceNetworkId}-${deviceName}",
 						null,
@@ -143,6 +153,7 @@ metadata {
 	log.trace "removing any child devices"
 	childDevices.each {
 		try{
+			log.trace "removing ${it.deviceNetworkId}"
 			deleteChildDevice(it.deviceNetworkId)
 		}
 		catch (e) {

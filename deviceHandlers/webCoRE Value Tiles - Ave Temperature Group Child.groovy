@@ -26,14 +26,15 @@ metadata {
 	definition (name: "webCoRE Value Tiles - Ave Temperature Group Child", namespace: "mbarone/apps", author: "mbarone", vid:"generic-motion") {
 		capability "Temperature Measurement"
 		capability "Sensor"
+		capability "Health Check"
 
 		attribute "lastUpdated", "String"
 	}
 
 	tiles(scale: 2) {
-		multiAttributeTile(name:"temperature", type: "generic"){
+		multiAttributeTile(name:"temperatureChild", type: "generic"){
 			tileAttribute ("temperature", key: "PRIMARY_CONTROL") {
-				state("default", label:'${currentValue}°', icon: "st.alarm.temperature.normal",
+				attributeState("temperature", label:'${currentValue}°', icon: "st.alarm.temperature.normal",
 					backgroundColors:[
 						[value: 31, color: "#153591"],
 						[value: 44, color: "#1e9cbb"],
