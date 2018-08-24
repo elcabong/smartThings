@@ -41,6 +41,7 @@ metadata {
 			state "DISARMED", label:'DISARMED', icon:'st.security.alarm.off', backgroundColor:"#41C710"
 			state "ARMEDStay", label:'ARMED (Stay)', icon:"st.Home.home4", backgroundColor:"#00a0dc"
 			state "ARMEDAway", label:'ARMED (Away)', icon:"st.security.alarm.on", backgroundColor:"#00a0dc"
+			state "siren", label:'ALERT', icon:"st.secondary.siren", backgroundColor:"#e86d13"
 		}
 		standardTile("DISARMED", "device.alarm", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
 			state "default", label:'DISARM', action:"DISARMED", icon:"st.security.alarm.off", backgroundColor:"#41C710"
@@ -51,8 +52,20 @@ metadata {
 		standardTile("ARMEDAway", "device.alarm", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
 			state "default", label:'Set ARMED (Away)', action:"ARMEDAway", icon:"st.security.alarm.on", backgroundColor:"#00a0dc"
 		}
+		standardTile("siren", "device.alarm", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
+			state "default", label:'', action:"alarm.siren", icon:"st.secondary.siren", backgroundColor:"#e86d13"
+		}
+		standardTile("empty", "null", decoration: "flat", width: 2, height: 2) {
+			state "emptySmall", label:'', defaultState: true
+		}
+		standardTile("emptyS", "null", decoration: "flat", width: 2, height: 1) {
+			state "emptySmall", label:'', defaultState: true
+		}
+		standardTile("off", "device.alarm", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
+			state "default", label:'', action:"alarm.off", icon:"st.secondary.off", backgroundColor:"#00a0dc"
+		}
 		main "alarm"
-		details(["alarm","DISARMED","ARMEDStay","ARMEDAway"])
+		details(["alarm","ARMEDAway","ARMEDStay","DISARMED","emptyS","emptyS","emptyS","siren","empty","off"])
 	}
 }
 
@@ -89,6 +102,19 @@ def DISARMED() {
 	log.trace "Executing 'DISARMED'"
 	sendEvent(name: "alarm", value: "DISARMED")
 }
+
+def siren() {
+	sendEvent(name: "alarm", value: "siren")
+}
+
+def both() {
+	sendEvent(name: "alarm", value: "siren")
+}
+
+def off() {
+	sendEvent(name: "alarm", value: "off")
+}
+
 
 // Parse incoming device messages to generate events
 def parse(String description) {
