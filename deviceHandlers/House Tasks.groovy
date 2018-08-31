@@ -12,17 +12,33 @@
  *
  */
 metadata {
- 	definition (name: "House Tasks", namespace: "mbarone/apps", author: "mbarone") {
+ 	definition (name: "House Tasks", namespace: "mbarone/apps", author: "mbarone", vid: "generic-button") {
  	capability "Actuator"
  	capability "Switch"
     capability "Momentary"
     capability "Health Check"
 
     command "pushed"
+    command "GotMail"
     command "WaterFrontyard"
     command "WaterBackyard"
+	command "WaterInside"
+	command "TrimCatNailsH"
+	command "TrimCatNailsT"
+	
     }
  	tiles(scale: 2){
+        valueTile("GotMail-Title", "device.Title", width: 2, height: 1) {
+ 			state( "default", label:'Got Mail')
+ 		}
+        standardTile("GotMail-LastUpdated", "device.GotMail-LastUpdated", inactiveLabel: false, width: 3, height: 1, decoration: "flat", wordWrap: true) {
+            state "default", label:'Last Completed: \n ${currentValue}'
+        }		
+        standardTile("GotMail-Button", "device.GotMail-Button", inactiveLabel: false, width: 1, height: 1, decoration: "flat", wordWrap: true) {
+				state("off", label: 'Done', action: "GotMail", backgroundColor: "#ffffff", nextState: "on")
+				state("on", label: 'Done', backgroundColor: "#00a0dc")
+        }	
+	
         valueTile("WaterFrontyard-Title", "device.Title", width: 2, height: 1) {
  			state( "default", label:'Water Frontyard')
  		}
@@ -33,6 +49,7 @@ metadata {
 				state("off", label: 'Done', action: "WaterFrontyard", backgroundColor: "#ffffff", nextState: "on")
 				state("on", label: 'Done', backgroundColor: "#00a0dc")
         }
+		
         valueTile("WaterBackyard-Title", "device.Title", width: 2, height: 1) {
  			state( "default", label:'Water Backyard')
  		}
@@ -43,8 +60,47 @@ metadata {
 				state("off", label: 'Done', action: "WaterBackyard", backgroundColor: "#ffffff", nextState: "on")
 				state("on", label: 'Done', backgroundColor: "#00a0dc")
         }	
+
+        valueTile("WaterInside-Title", "device.Title", width: 2, height: 1) {
+ 			state( "default", label:'Water Inside')
+ 		}
+        standardTile("WaterInside-LastUpdated", "device.WaterInside-LastUpdated", inactiveLabel: false, width: 3, height: 1, decoration: "flat", wordWrap: true) {
+            state "default", label:'Last Completed: \n ${currentValue}'
+        }		
+        standardTile("WaterInside-Button", "device.WaterInside-Button", inactiveLabel: false, width: 1, height: 1, decoration: "flat", wordWrap: true) {
+				state("off", label: 'Done', action: "WaterInside", backgroundColor: "#ffffff", nextState: "on")
+				state("on", label: 'Done', backgroundColor: "#00a0dc")
+        }
 		
-		details(["WaterFrontyard-Title","WaterFrontyard-LastUpdated","WaterFrontyard-Button","WaterBackyard-Title","WaterBackyard-LastUpdated","WaterBackyard-Button"])
+        valueTile("TrimCatNailsH-Title", "device.Title", width: 2, height: 1) {
+ 			state( "default", label:'Trim Cat Nails H')
+ 		}
+        standardTile("TrimCatNailsH-LastUpdated", "device.TrimCatNailsH-LastUpdated", inactiveLabel: false, width: 3, height: 1, decoration: "flat", wordWrap: true) {
+            state "default", label:'Last Completed: \n ${currentValue}'
+        }		
+        standardTile("TrimCatNailsH-Button", "device.TrimCatNailsH-Button", inactiveLabel: false, width: 1, height: 1, decoration: "flat", wordWrap: true) {
+				state("off", label: 'Done', action: "TrimCatNailsH", backgroundColor: "#ffffff", nextState: "on")
+				state("on", label: 'Done', backgroundColor: "#00a0dc")
+        }		
+		
+        valueTile("TrimCatNailsT-Title", "device.Title", width: 2, height: 1) {
+ 			state( "default", label:'Trim Cat Nails T')
+ 		}
+        standardTile("TrimCatNailsT-LastUpdated", "device.TrimCatNailsT-LastUpdated", inactiveLabel: false, width: 3, height: 1, decoration: "flat", wordWrap: true) {
+            state "default", label:'Last Completed: \n ${currentValue}'
+        }		
+        standardTile("TrimCatNailsT-Button", "device.TrimCatNailsT-Button", inactiveLabel: false, width: 1, height: 1, decoration: "flat", wordWrap: true) {
+				state("off", label: 'Done', action: "TrimCatNailsT", backgroundColor: "#ffffff", nextState: "on")
+				state("on", label: 'Done', backgroundColor: "#00a0dc")
+        }		
+		
+		details(["GotMail-Title","GotMail-LastUpdated","GotMail-Button"
+				,"WaterFrontyard-Title","WaterFrontyard-LastUpdated","WaterFrontyard-Button"
+				,"WaterBackyard-Title","WaterBackyard-LastUpdated","WaterBackyard-Button"
+				,"WaterInside-Title","WaterInside-LastUpdated","WaterInside-Button"
+				,"TrimCatNailsH-Title","TrimCatNailsH-LastUpdated","TrimCatNailsH-Button"
+				,"TrimCatNailsT-Title","TrimCatNailsT-LastUpdated","TrimCatNailsT-Button"
+				])
 	}
  }
  def parse(String description){
@@ -52,12 +108,28 @@ metadata {
     createEvent(name: pair[0].trim(), value: pair[1].trim(), unit:"F")
  }
 
+  def GotMail() {
+ 	pushed("GotMail")
+ }
+ 
  def WaterFrontyard() {
  	pushed("WaterFrontyard")
  }
 
  def WaterBackyard() {
  	pushed("WaterBackyard")
+ }
+ 
+  def WaterInside() {
+ 	pushed("WaterInside")
+ }
+
+  def TrimCatNailsH() {
+ 	pushed("TrimCatNailsH")
+ }
+ 
+ def TrimCatNailsT() {
+ 	pushed("TrimCatNailsT")
  }
  
  def pushed(thisname) {
