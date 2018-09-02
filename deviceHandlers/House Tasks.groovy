@@ -28,6 +28,10 @@ metadata {
 	
     }
  	tiles(scale: 2){
+        standardTile("Main", "device.Main", inactiveLabel: false, width: 3, height: 1, decoration: "flat", wordWrap: true) {
+            state "default", label:'', icon:"st.Office.office7"
+        }
+		
         valueTile("GotMail-Title", "device.Title", width: 2, height: 1) {
  			state( "default", label:'Got Mail')
  		}
@@ -93,6 +97,8 @@ metadata {
 				state("off", label: 'Done', action: "TrimCatNailsT", backgroundColor: "#ffffff", nextState: "on")
 				state("on", label: 'Done', backgroundColor: "#00a0dc")
         }		
+		
+		main(["Main"])
 		
 		details(["GotMail-Title","GotMail-LastUpdated","GotMail-Button"
 				,"WaterFrontyard-Title","WaterFrontyard-LastUpdated","WaterFrontyard-Button"
