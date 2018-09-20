@@ -30,10 +30,15 @@ metadata {
 	}
 
 	tiles {
-		standardTile("contact", "device.contact", width: 2, height: 2) {
-			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00A0DC")
-			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
-		}
+		multiAttributeTile(name:"contact", type: "generic"){
+			tileAttribute ("contact", key: "PRIMARY_CONTROL") {
+				attributeState("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00A0DC")
+				attributeState("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")			
+            }
+ 			tileAttribute("device.lastUpdated", key: "SECONDARY_CONTROL") {
+    				attributeState("default", label:'    Last updated ${currentValue}',icon: "st.Health & Wellness.health9")
+            }
+        }		
 		main "contact"
 		details "contact"
 	}
@@ -65,9 +70,18 @@ def parse(String description) {
 def open() {
 	log.trace "open()"
 	sendEvent(name: "contact", value: "open")
+	setLastUpdated()
 }
 
 def close() {
 	log.trace "close()"
     sendEvent(name: "contact", value: "closed")
+	setLastUpdated()
+}
+
+def setLastUpdated() {
+	// Update lastUpdated date and time
+	def nowDay = new Date().format("MMM dd", location.timeZone)
+	def nowTime = new Date().format("h:mm a", location.timeZone)
+	sendEvent(name: "lastUpdated", value: nowDay + " at " + nowTime, displayed: false)
 }
