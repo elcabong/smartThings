@@ -2,6 +2,8 @@
  *  HTTP Ping
  *
  *  Copyright 2014 Kristopher Kubicki
+ *  updated by michaelbarone 2018
+ *  https://github.com/michaelbarone/smartThings/tree/master/deviceHandlers
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -38,30 +40,25 @@ metadata {
 	}
 
 	tiles {
-		standardTile("contact", "device.contact", width: 2, height: 2, canChangeIcon: false, canChangeBackground: true) {
-//
-// color scheme is inverse of a normal sensor. 
-//
-            state "open", label: 'Online', backgroundColor: "#79b821", icon:"st.Electronics.electronics18"
-            state "closed", label: 'Offline', backgroundColor: "#ffa81e", icon:"st.Electronics.electronics18"
-        }
-        standardTile("refresh", "device.ttl", inactiveLabel: false, decoration: "flat") {
-            state "default", action:"polling.poll", icon:"st.secondary.refresh"
-        }
-        standardTile("ttl", "device.ttl", inactiveLabel: false, decoration: "flat") {
-            state "ttl", label:'${currentValue}'
-        }
-        standardTile("last_requestV", "device.last_requestV", width: 3, height: 1, inactiveLabel: false, decoration: "flat") {
-            state "default", label:'Last Request: ${currentValue}'
-        }        
-        standardTile("last_liveV", "device.last_liveV", width: 3, height: 1, inactiveLabel: false, decoration: "flat") {
-            state "default", label:'Last Online: ${currentValue}'
-        } 
+			standardTile("contact", "device.contact", width: 2, height: 2, canChangeIcon: false, canChangeBackground: true) {
+				state "open", label: 'Online', backgroundColor: "#79b821", icon:"st.Electronics.electronics18"
+				state "closed", label: 'Offline', backgroundColor: "#ffa81e", icon:"st.Electronics.electronics18"
+			}
+			standardTile("refresh", "device.ttl", inactiveLabel: false, decoration: "flat") {
+				state "default", action:"polling.poll", icon:"st.secondary.refresh"
+			}
+			standardTile("ttl", "device.ttl", inactiveLabel: false, decoration: "flat") {
+				state "ttl", label:'${currentValue}'
+			}
+			standardTile("last_requestV", "device.last_requestV", width: 3, height: 1, inactiveLabel: false, decoration: "flat") {
+				state "default", label:'Last Request: ${currentValue}'
+			}        
+			standardTile("last_liveV", "device.last_liveV", width: 3, height: 1, inactiveLabel: false, decoration: "flat") {
+				state "default", label:'Last Online: ${currentValue}'
+			} 
 
-
-
-main "contact"
-        	details(["contact", "refresh", "ttl","last_requestV","last_liveV"])
+			main "contact"
+			details(["contact", "refresh", "ttl","last_requestV","last_liveV"])
 		}
 	}
 
@@ -71,23 +68,14 @@ main "contact"
 
 def parse(String description) {
 	log.debug "Parsing '${description}'"
-    def map = stringToMap(description)
-
-//  def headerString = new String(map.headers.decodeBase64())
-//	def bodyString = new String(map.body.decodeBase64())
-//  log.debug "Parsing '${headerString}'"
-//	log.debug "Parsing '${bodyString}'"
+    //def map = stringToMap(description)
     
     def c = new GregorianCalendar()
     sendEvent(name: 'contact', value: "open")
     sendEvent(name: 'last_live', value: c.time.time)
 	def timeNow = new Date().format("MMM dd h:mm a", location.timeZone)
 	sendEvent(name: 'last_liveV', value: timeNow)
-    def ping = ttl()
-    sendEvent(name: 'ttl', value: ping)
-    
-   log.debug "Pinging ${device.deviceNetworkId}: ${ping}"
-
+    sendEvent(name: 'ttl', value: ttl())
 }
 
 private ttl() { 
@@ -147,12 +135,11 @@ def poll() {
 	sendEvent(name: 'last_requestV', value: timeNow)
 	
     def hosthex = convertIPToHex(dest_ip)
-    //def porthex = Long.toHexString(Long.parseLong(dest_port))
     def porthex = Long.toHexString(dest_port)
     if (porthex.length() < 4) { porthex = "00" + porthex }
 	device.deviceNetworkId = "$hosthex:$porthex" 
     
-//   log.debug "The DNI configured is $device.deviceNetworkId"
+	// log.debug "The DNI configured is $device.deviceNetworkId"
        
     def hubAction = new physicalgraph.device.HubAction(
     	method: "GET",
@@ -179,7 +166,7 @@ def poll() {
     sendEvent(name: 'last_request', value: c.time.time)
 
        
-  log.debug hubAction
+	log.debug hubAction
     
 	hubAction
 }
