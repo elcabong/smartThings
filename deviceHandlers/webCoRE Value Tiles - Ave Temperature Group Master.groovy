@@ -168,3 +168,9 @@ metadata {
  def Off(){
  	sendEvent(name: "switch", value: "off")
  }
+ def on(){
+ 	sendEvent(name: "switch", value: "on")
+ }
+ def off(){
+ 	sendEvent(name: "switch", value: "off")
+ }
