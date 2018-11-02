@@ -16,7 +16,7 @@
  *
  *	To be used with the following webCoRE pistons:
  *	 import code  -    piston name
- *      sdbe   - "Average Temperatures"
+ *      q74vi   - "Average Temperatures"
  *		j97uv  - "Average Temperatures ctrl"
  *
  *	See discussion thread:
