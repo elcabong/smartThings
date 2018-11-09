@@ -12,16 +12,24 @@
  *
  *  Modified by mbarone to remove the click to change functionality of the tiles when used on the favorites screen.  This will
  *  now only show the open/close status like a hardware open close sensor, and not allow you to change the open/close status from the tile.
+ *
+ *
+ *	one use case for this dth is monitoring an external or secondary contact for a linear door sensor or other multi input sensor.  this uses the following webcore piston to function:
+ *	webcore import code:  n4p40
+ *
  */
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "Simulated Contact Sensor - custom", namespace: "mbarone/apps", author: "mbarone") {
+	definition (name: "Simulated Contact Sensor - custom", namespace: "mbarone/apps", author: "mbarone", vid:"generic-contact") {
 		capability "Contact Sensor"
 		capability "Sensor"
 		capability "Health Check"
+		capability "Switch"
 
 		command "open"
 		command "close"
+		command "Refresh"
+		command "off"
 	}
 
 	simulator {
@@ -38,9 +46,13 @@ metadata {
  			tileAttribute("device.lastUpdated", key: "SECONDARY_CONTROL") {
     				attributeState("default", label:'    Last updated ${currentValue}',icon: "st.Health & Wellness.health9")
             }
+        }
+        standardTile("Refresh", "device.switch", inactiveLabel: false, width: 2, height: 1, decoration: "flat", wordWrap: true) {
+            state "off", action:"Refresh", label: "Refresh", icon:"st.secondary.refresh"
+            state "on", action:"off", label: "Refreshing", icon:"st.motion.motion.active"
         }		
 		main "contact"
-		details "contact"
+		details(["contact","Refresh"])
 	}
 }
 
@@ -84,4 +96,13 @@ def setLastUpdated() {
 	def nowDay = new Date().format("MMM dd", location.timeZone)
 	def nowTime = new Date().format("h:mm a", location.timeZone)
 	sendEvent(name: "lastUpdated", value: nowDay + " at " + nowTime, displayed: false)
+}
+
+def Refresh(){
+ 	sendEvent(name: "switch", value: "on")
+	runIn(3, off)
+}
+
+def off(){
+	sendEvent(name: "switch", value: "off")
 }
