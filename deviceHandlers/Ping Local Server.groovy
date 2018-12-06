@@ -24,17 +24,16 @@ preferences {
  
 
 metadata {
-	definition (name: "Ping Local Server", namespace: "mbarone/apps", author: "mbarone") {
+	definition (name: "Ping Local Server", namespace: "mbarone/apps", author: "mbarone", vid:"generic-motion") {
 		capability "Polling"
-		capability "Contact Sensor"
 		capability "Refresh"
 		capability "Health Check"
-      
-        attribute "ttl", "string"
-        attribute "last_request", "number"
-        attribute "last_live", "number"
-        attribute "last_requestV", "string"
-        attribute "last_liveV", "string"
+		
+		attribute "Child","string"
+		attribute "Details","string"
+		
+		command "changeChildValue"
+		command "removeChildren"		
 	}
 
 	simulator {
@@ -43,24 +42,21 @@ metadata {
 
 	tiles {
 			standardTile("main", "device.contact", width: 2, height: 2, canChangeIcon: false, canChangeBackground: true) {
-				state "open", label: 'Online', backgroundColor: "#79b821", icon:"st.Electronics.electronics18"
-				state "closed", label: 'Offline', backgroundColor: "#ffa81e", icon:"st.Electronics.electronics18"
+				state "default", label:'', icon:"st.Electronics.electronics18"
 			}
 			standardTile("refresh", "device.ttl", inactiveLabel: false, decoration: "flat") {
 				state "default", action:"polling.poll", icon:"st.secondary.refresh"
 			}
-			standardTile("ttl", "device.ttl", inactiveLabel: false, decoration: "flat") {
-				state "ttl", label:'${currentValue}'
+			standardTile("removeChildren", "device.removeChildren", inactiveLabel: false, width: 3, height: 1, decoration: "flat", wordWrap: true){
+				state "default", label:'Remove Children', action:"removeChildren"
 			}
-			standardTile("last_requestV", "device.last_requestV", width: 3, height: 1, inactiveLabel: false, decoration: "flat") {
-				state "default", label:'Last Request: ${currentValue}'
-			}        
-			standardTile("last_liveV", "device.last_liveV", width: 3, height: 1, inactiveLabel: false, decoration: "flat") {
-				state "default", label:'Last Online: ${currentValue}'
-			} 
-
+			standardTile("Details", "device.Details", width: 2, height: 1, decoration: "flat", wordWrap: true) {
+				state "default", label:'${currentValue}'
+			}
+			
+			childDeviceTiles("All")
 			main "main"
-			details(["main", "refresh", "ttl","last_requestV","last_liveV"])
+			details(["Details", "refresh", "All", "removeChildren"])
 		}
 	}
 
@@ -69,8 +65,14 @@ def parse(description) {
     log.debug "parse starting"
     def msg = parseLanMessage(description)
 	log.debug msg.json
+	def cmds = []
+	cmds << "delay 1000"
+	
+	
 	msg.json.each {
 		log.debug "item: $it.ip is $it.status"
+		changeChildValue(it.ip, it.status)
+		cmds
 	}
 }
 	
@@ -78,21 +80,10 @@ def parse(description) {
 
 def poll() {
 	log.debug "poll starting"
-
-    //def hosthex = convertIPToHex(dest_ip)
-    //def porthex = Long.toHexString(dest_port)	
-    //def hosthex = convertIPtoHex(dest_ip)
-    //def porthex = convertPortToHex(dest_port)
-	
-	
-	
     def hosthex = convertIPToHex(dest_ip)
     def porthex = Long.toHexString(dest_port)
     if (porthex.length() < 4) { porthex = "00" + porthex }
-	//device.deviceNetworkId = "$hosthex:$porthex" 	
-	
-	
-   // device.deviceNetworkId = "$hosthex:$porthex" 
+    device.deviceNetworkId = "$hosthex:$porthex" 
 	log.debug "device.deviceNetworkId is " + device.deviceNetworkId
     
     def hubAction = new physicalgraph.device.HubAction(
@@ -104,7 +95,7 @@ def poll() {
 		)
     log.debug "hubaction is: " + hubAction
     
-    hubAction // also tried to "return hubAction"
+    hubAction
 }
 
 
@@ -134,3 +125,91 @@ private String convertIPToHex(ipAddress) {
 	log.debug ipAddress
 	return Long.toHexString(convertIntToLong(ipAddress));
 }
+
+
+
+ def changeChildValue(title, param) {
+	log.debug "changeChildValue: "+title+" is "+param
+    sendEvent(name:"Details", value:"", displayed: false)
+	def childDevice = null
+	def name = title
+	def value = param
+	def deviceType = "switch"
+	try {
+		childDevices.each {
+			try{
+				log.debug "1-Looking for child with deviceNetworkID = ${device.deviceNetworkId}-${name} against ${it.deviceNetworkId}"
+				if (it.deviceNetworkId == "${device.deviceNetworkId}-${name}") {
+					childDevice = it
+					log.debug "Found a match 1!!!"
+				}
+			}
+			catch (e) {
+				log.debug e
+			}
+		}	
+		if (childDevice == null) {
+			log.debug "isChild = true, but no child found - Auto Add it!"
+			log.debug "    Need a ${name}"
+		
+			createChildDevice(name)
+			//find child again, since it should now exist!
+			childDevices.each {
+				try{
+					log.debug "2-Looking for child with deviceNetworkID = ${device.deviceNetworkId}-${name} against ${it.deviceNetworkId}"
+					if (it.deviceNetworkId == "${device.deviceNetworkId}-${name}") {
+						childDevice = it
+						log.debug "Found a match 2!!!"
+					}
+				}
+				catch (e) {
+					log.debug e
+				}
+			}
+		}
+		if (childDevice != null) {
+            //log.debug "parse() found child device ${childDevice.deviceNetworkId}"
+			//log.debug "sending parse(${deviceType} ${value})"
+            childDevice.parse("${deviceType} ${value}")
+			log.debug "${childDevice.deviceNetworkId} - name: ${name} (switch), value: ${value}"
+		}
+	}
+	catch (e) {
+        log.error "Error in parse() routine, error = ${e}"
+	}
+ }
+ private void createChildDevice(String deviceName) {
+	log.trace "createChildDevice:  Creating Child Device '${device.displayName} (${deviceName})'"
+	try {
+		def deviceHandlerName = "Ping Local Server Child"
+		addChildDevice(deviceHandlerName,
+						"${device.deviceNetworkId}-${deviceName}",
+						null,
+						[
+							completedSetup: true, 
+							label: "${device.displayName} (${deviceName})", 
+							isComponent: true, 
+							componentName: "${deviceName}", 
+							componentLabel: "${deviceName}"
+						]
+					)
+        sendEvent(name:"Details", value:"Child device created!  May take some time to display.")
+	}
+	catch (e) {
+        log.error "Child device creation failed with error = ${e}"
+        state.alertMessage = "Child device creation failed. Please make sure that the '${deviceHandlerName}' is installed and published."
+	}
+ }
+ def removeChildren(){
+	log.trace "removing any child devices"
+	childDevices.each {
+		try{
+			log.trace "removing ${it.deviceNetworkId}"
+			deleteChildDevice(it.deviceNetworkId)
+		}
+		catch (e) {
+			log.debug "Error deleting ${it.deviceNetworkId}: ${e}"
+		}
+	}
+	sendEvent(name:"Details", value:"Child devices removed!  May take some time to remove device.  Refresh when ready to re-build child devices, or wait until a device changes state.")
+ }
