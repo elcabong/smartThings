@@ -23,7 +23,7 @@
  * 
  */
 metadata {
-	definition (name: "Ping Local Server Child", namespace: "mbarone/apps", author: "mbarone", vid:"generic-motion") {
+	definition (name: "Ping Local Server Child", namespace: "mbarone/apps", author: "mbarone", vid:"generic-switch") {
 		capability "Actuator"
 		capability "Sensor"
 		capability "Switch"
