@@ -16,8 +16,8 @@
  *
  *	To be used with the following webCoRE pistons:
  *	 import code  -    piston name
- *      q74vi   - "Average Temperatures"
- *		j97uv  - "Average Temperatures ctrl"
+ *      0tkf   - "Average Temperatures"
+ *
  *
  *	See discussion thread:
  *		https://community.smartthings.com/t/release-custom-dth-and-webcore-pistons-for-grouping-like-sensors-and-giving-1-aggregated-status-for-the-group/134270
