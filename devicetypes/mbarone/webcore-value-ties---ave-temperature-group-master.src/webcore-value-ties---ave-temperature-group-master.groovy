@@ -12,9 +12,12 @@
  *
  *
  *
- *	To be used with the following webCoRE piston:
+ *
+ *
+ *	To be used with the following webCoRE pistons:
  *	 import code  -    piston name
- *      50bko   - "All Exterior Doors"
+ *      0tkf   - "Average Temperatures"
+ *
  *
  *	See discussion thread:
  *		https://community.smartthings.com/t/release-custom-dth-and-webcore-pistons-for-grouping-like-sensors-and-giving-1-aggregated-status-for-the-group/134270
@@ -23,19 +26,16 @@
  *
  */
 metadata {
- 	definition (name: "webCoRE Value Ties - Contact Sensor Group Master", namespace: "mbarone/apps", author: "mbarone", vid:"generic-contact") {
-		capability "Contact Sensor"
+ 	definition (name: "webCoRE Value Ties - Ave Temperature Group Master", namespace: "mbarone", author: "mbarone", vid:"generic-motion") {
+		capability "Temperature Measurement"
 		capability "Sensor"
 		capability "Switch"
 		capability "Health Check"
 		
-		attribute "Main","string"
 		attribute "Details","string"
 		
 		command "changeMain"
 		command "changeChildValue"
-		command "open"
-		command "close"
 		command "On"
 		command "Off"
 		command "removeChildren"
@@ -43,15 +43,20 @@ metadata {
 	
  	tiles(scale: 2){
 		multiAttributeTile(name:"Main", type: "generic", width: 6, height: 4) {
-			tileAttribute ("device.Main", key: "PRIMARY_CONTROL") {
-				attributeState("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00A0DC")
-				attributeState("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
+			tileAttribute ("temperature", key: "PRIMARY_CONTROL") {
+				attributeState("temperature", label:'${currentValue}°',
+					backgroundColors:[
+						[value: 31, color: "#153591"],
+						[value: 44, color: "#1e9cbb"],
+						[value: 59, color: "#90d2a7"],
+						[value: 74, color: "#44b621"],
+						[value: 84, color: "#f1d801"],
+						[value: 95, color: "#d04e00"],
+						[value: 96, color: "#bc2323"]
+					]
+				)
 			}
-			tileAttribute ("device.openDevices", key: "SECONDARY_CONTROL") {
-				attributeState "default", label:'${currentValue} Open Devices', icon: "st.contact.contact.open"
-				attributeState "1", label:'${currentValue} Open Device', icon: "st.contact.contact.open"
-			}
-		}
+		}		
         standardTile("Refresh", "device.switch", inactiveLabel: false, width: 2, height: 1, decoration: "flat", wordWrap: true) {
             state "off", action:"On", label: "Refresh", icon:"st.secondary.refresh"
             state "on", action:"Off", label: "Refreshing", icon:"st.motion.motion.active"
@@ -71,16 +76,15 @@ metadata {
  	def pair = description.split(":")
     createEvent(name: pair[0].trim(), value: pair[1].trim(), unit:"F")
  }
- def changeMain (param, openDevices, details){
- 	sendEvent("name":"Main", "value":param)
-	sendEvent("name":"openDevices", "value":openDevices)
+ def changeMain (param, details){
+	sendEvent("name":"temperature", "value": param)
 	sendEvent("name":"Details", "value":details)
  }
  def changeChildValue (title, param) {
 	def childDevice = null
 	def name = title
 	def value = param
-	def deviceType = "contact"
+	def deviceType = "temperature"
 	try {
 		childDevices.each {
 			try{
@@ -117,7 +121,7 @@ metadata {
             //log.debug "parse() found child device ${childDevice.deviceNetworkId}"
 			//log.debug "sending parse(${deviceType} ${value})"
             childDevice.parse("${deviceType} ${value}")
-			log.debug "${childDevice.deviceNetworkId} - name: ${name} (contact), value: ${value}"
+			log.debug "${childDevice.deviceNetworkId} - name: ${name} (temperature), value: ${value}"
 		}
 	}
 	catch (e) {
@@ -127,7 +131,7 @@ metadata {
  private void createChildDevice(String deviceName) {
 	log.trace "createChildDevice:  Creating Child Device '${device.displayName} (${deviceName})'"
 	try {
-		def deviceHandlerName = "webCoRE Value Ties - Contact Sensor Group Child"
+		def deviceHandlerName = "webCoRE Value Ties - Ave Temperature Group Child"
 		addChildDevice(deviceHandlerName,
 						"${device.deviceNetworkId}-${deviceName}",
 						null,
@@ -145,16 +149,8 @@ metadata {
         state.alertMessage = "Child device creation failed. Please make sure that the '${deviceHandlerName}' is installed and published."
 	}
  }
- def open() {
-	//log.trace "open()"
-	sendEvent(name: "contact", value: "open")
- }
- def close() {
-	//log.trace "close()"
-    sendEvent(name: "contact", value: "closed")
- }
  def removeChildren(){
-	log.trace "removing any child devices"
+	log.trace "starting: removing any child devices"
 	childDevices.each {
 		try{
 			log.trace "removing ${it.deviceNetworkId}"
@@ -170,5 +166,11 @@ metadata {
  	sendEvent(name: "switch", value: "on")
  }
  def Off(){
+ 	sendEvent(name: "switch", value: "off")
+ }
+ def on(){
+ 	sendEvent(name: "switch", value: "on")
+ }
+ def off(){
  	sendEvent(name: "switch", value: "off")
  }

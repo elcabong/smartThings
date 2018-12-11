@@ -12,21 +12,41 @@
  *
  */
 metadata {
- 	definition (name: "House Tasks", namespace: "mbarone/apps", author: "mbarone", vid: "generic-button") {
- 	capability "Actuator"
- 	capability "Switch"
-    capability "Momentary"
-    capability "Health Check"
+ 	definition (name: "The Lady", namespace: "mbarone/apps", author: "mbarone", vid: "generic-button") {
+		capability "Actuator"
+		capability "Switch"
+		capability "Momentary"
+		capability "Health Check"
 
-    command "pushed"
-    command "GotMail"
-    command "WaterFrontyard"
-    command "WaterBackyard"
-	command "WaterInside"
-	command "TrimCatNailsH"
-	command "TrimCatNailsT"
-	
+		command "pushed"
     }
+	
+	
+    preferences {
+        input name: "GCNb", type: "bool", title: "Global Child Name(s)", description: "Enable Global Child Name", required: false
+        input name: "GCN", type: "text", title: "Child Name(s)", description: "Child name or names, comma separated as will be read aloud.", required: false
+		
+		
+		
+		(1..4).each() { n ->
+			section("Custom Lady Message ${n}") {
+				input "name_${n}", type: "text", title:"Custom Message ${n} Title", multiple:true, required:false
+				input "message_${n}", type: "text", title:"Message ${n}", multiple:true, required:false
+			}
+		}
+		/*
+        input name: "number", type: "number", title: "Number", description: "Enter number", required: true
+        input name: "bool", type: "bool", title: "Bool", description: "Enter boolean", required: true
+        input name: "password", type: "password", title: "password", description: "Enter password", required: true
+        input name: "phone", type: "phone", title: "phone", description: "Enter phone", required: true
+        input name: "decimal", type: "decimal", title: "decimal", description: "Enter decimal", required: true
+        input name: "time", type: "time", title: "time", description: "Enter time", required: true
+        input name: "options", type: "enum", title: "enum", options: ["Option 1", "Option 2"], description: "Enter enum", required: true
+		*/
+    }	
+	
+	
+	
  	tiles(scale: 2){
         standardTile("Main", "device.Main", inactiveLabel: false, width: 3, height: 1, decoration: "flat", wordWrap: true) {
             state "default", label:'', icon:"st.Office.office7"
@@ -112,30 +132,6 @@ metadata {
  def parse(String description){
  	def pair = description.split(":")
     createEvent(name: pair[0].trim(), value: pair[1].trim(), unit:"F")
- }
-
-  def GotMail() {
- 	pushed("GotMail")
- }
- 
- def WaterFrontyard() {
- 	pushed("WaterFrontyard")
- }
-
- def WaterBackyard() {
- 	pushed("WaterBackyard")
- }
- 
-  def WaterInside() {
- 	pushed("WaterInside")
- }
-
-  def TrimCatNailsH() {
- 	pushed("TrimCatNailsH")
- }
- 
- def TrimCatNailsT() {
- 	pushed("TrimCatNailsT")
  }
  
  def pushed(thisname) {

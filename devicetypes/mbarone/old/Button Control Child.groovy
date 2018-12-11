@@ -1,7 +1,7 @@
 /**
- *  webCoRE Value Ties - Button Group Child
+ *  Button Control Child
  *
- *  Copyright 2017 Daniel Ogorchock
+ *  Copyright 2018 Michael Barone
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -16,22 +16,20 @@
  *
  *    Date        Who            What
  *    ----        ---            ----
- *    2017-04-10  Dan Ogorchock  Original Creation
- *    2017-08-23  Allan (vseven) Added a generateEvent routine that gets info from the parent device.  This routine runs each time the value is updated which can lead to other modifications of the device.
- *    2018-06-02  Dan Ogorchock  Revised/Simplified for Hubitat Composite Driver Model
+ *    2018-11-28  mbarone		 orig commit
  *
  * 
  */
 metadata {
-	definition (name: "webCoRE Value Ties - Button Group Child", namespace: "mbarone/apps", author: "mbarone", vid:"generic-motion") {
+	definition (name: "Button Control Child", namespace: "mbarone/apps", author: "mbarone", vid:"generic-motion") {
 		capability "Actuator"
 		capability "Sensor"
 		capability "Switch"
 		capability "Health Check"
-
+		
 		command "sendData"
+		
 	}
-
 	simulator {
 		status "on": "switch:on"
 		status "off": "switch:off"
@@ -46,10 +44,9 @@ metadata {
     				attributeState("default", label:'    Last updated ${currentValue}',icon: "st.Health & Wellness.health9")
             }
 		}
-	}
-
+	}	
+	
 }
-
 
 def installed() {
     initialize()
@@ -64,26 +61,6 @@ def initialize() {
     sendEvent(name: "healthStatus", value: "online")
     sendEvent(name: "DeviceWatch-Enroll", value: [protocol: "cloud", scheme:"untracked"].encodeAsJson(), displayed: false)
 }
-
-def parse(String description) {
-    //log.trace "parse(${description}) called"
-	def parts = description.split(" ")
-    def name  = parts.length>0?parts[0].trim():null
-    def value = parts.length>1?parts[1].trim():null
-    if (name && value) {
-    	log.trace "name: "+name+", value:"+value
-        // Update device
-        sendEvent(name: name, value: value)
-        // Update lastUpdated date and time
-        //def nowDay = new Date().format("MMM dd", location.timeZone)
-        //def nowTime = new Date().format("h:mm a", location.timeZone)
-        //sendEvent(name: "lastUpdated", value: nowDay + " at " + nowTime, displayed: false)
-    }
-    else {
-    	log.debug "Missing either name or value.  Cannot parse!"
-    }
-}
-
 
 def on() {
     sendData("on")
@@ -104,8 +81,5 @@ def off() {
 def sendData(String value) {
     def name = device.displayName
 	//log.debug "sendData (${name}  ${value}) called"
-   // parent.sendEvent(name:"${name}", value: "${value}")
-	parent.sendEvent(name:"${name}", value: "${value}")
-	parent.sendEvent(name:"Child", value: "${name}, ${value}", displayed: false)
-	parent.sendEvent(name:"Details", value:"", displayed: false)
+    parent.sendEvent(name:"${name}", value: "${value}")
 }

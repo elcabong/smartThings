@@ -1,5 +1,5 @@
 /**
- *  webCoRE Value Ties - Ave Temperature Group Child
+ *  webCoRE Value Ties - Contact Sensor Group Child
  *
  *  Copyright 2017 Daniel Ogorchock
  *
@@ -23,8 +23,8 @@
  * 
  */
 metadata {
-	definition (name: "webCoRE Value Tiles - Ave Temperature Group Child", namespace: "mbarone/apps", author: "mbarone", vid:"generic-motion") {
-		capability "Temperature Measurement"
+	definition (name: "webCoRE Value Ties - Contact Sensor Group Child", namespace: "mbarone", author: "mbarone", vid:"generic-contact") {
+		capability "Contact Sensor"
 		capability "Sensor"
 		capability "Health Check"
 
@@ -32,19 +32,10 @@ metadata {
 	}
 
 	tiles(scale: 2) {
-		multiAttributeTile(name:"temperatureChild", type: "generic"){
-			tileAttribute ("temperature", key: "PRIMARY_CONTROL") {
-				attributeState("temperature", label:'${currentValue}°', icon: "st.alarm.temperature.normal",
-					backgroundColors:[
-						[value: 31, color: "#153591"],
-						[value: 44, color: "#1e9cbb"],
-						[value: 59, color: "#90d2a7"],
-						[value: 74, color: "#44b621"],
-						[value: 84, color: "#f1d801"],
-						[value: 95, color: "#d04e00"],
-						[value: 96, color: "#bc2323"]
-					]
-				)
+		multiAttributeTile(name:"contact", type: "generic"){
+			tileAttribute ("device.contact", key: "PRIMARY_CONTROL") {
+				attributeState "open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13"
+				attributeState "closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00a0dc"
             }
  			tileAttribute("device.lastUpdated", key: "SECONDARY_CONTROL") {
     				attributeState("default", label:'    Last updated ${currentValue}',icon: "st.Health & Wellness.health9")

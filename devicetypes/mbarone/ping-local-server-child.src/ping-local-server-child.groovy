@@ -1,5 +1,5 @@
 /**
- *  webCoRE Value Ties - Contact Sensor Group Child
+ *  Ping Local Server Child
  *
  *  Copyright 2017 Daniel Ogorchock
  *
@@ -23,19 +23,20 @@
  * 
  */
 metadata {
-	definition (name: "webCoRE Value Ties - Contact Sensor Group Child", namespace: "mbarone/apps", author: "mbarone", vid:"generic-contact") {
-		capability "Contact Sensor"
+	definition (name: "Ping Local Server Child", namespace: "mbarone", author: "mbarone", vid:"generic-switch") {
+		capability "Actuator"
 		capability "Sensor"
+		capability "Switch"
 		capability "Health Check"
 
 		attribute "lastUpdated", "String"
 	}
 
 	tiles(scale: 2) {
-		multiAttributeTile(name:"contact", type: "generic"){
-			tileAttribute ("device.contact", key: "PRIMARY_CONTROL") {
-				attributeState "open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13"
-				attributeState "closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00a0dc"
+		multiAttributeTile(name:"switch", type: "generic"){
+			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+				attributeState "on", label: 'Online', backgroundColor: "#79b821", icon:"st.Electronics.electronics18"
+				attributeState "off", label: 'Offline', backgroundColor: "#ffa81e", icon:"st.Electronics.electronics18"
             }
  			tileAttribute("device.lastUpdated", key: "SECONDARY_CONTROL") {
     				attributeState("default", label:'    Last updated ${currentValue}',icon: "st.Health & Wellness.health9")
@@ -46,7 +47,7 @@ metadata {
 }
 
 def parse(String description) {
-    //log.trace "parse(${description}) called"
+    log.trace "parse(${description}) called"
 	def parts = description.split(" ")
     def name  = parts.length>0?parts[0].trim():null
     def value = parts.length>1?parts[1].trim():null

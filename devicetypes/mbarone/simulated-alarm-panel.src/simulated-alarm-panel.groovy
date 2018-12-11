@@ -22,7 +22,7 @@
  *
  */
 metadata {
-	definition (name: "Simulated Alarm - Panel", namespace: "mbarone/apps", author: "mbarone") {
+	definition (name: "Simulated Alarm Panel", namespace: "mbarone", author: "mbarone") {
 		capability "Alarm"
 		capability "Sensor"
 		capability "Actuator"

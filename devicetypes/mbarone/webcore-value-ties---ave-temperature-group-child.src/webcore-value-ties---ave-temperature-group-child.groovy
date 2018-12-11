@@ -1,5 +1,5 @@
 /**
- *  Ping Local Server Child
+ *  webCoRE Value Ties - Ave Temperature Group Child
  *
  *  Copyright 2017 Daniel Ogorchock
  *
@@ -23,20 +23,28 @@
  * 
  */
 metadata {
-	definition (name: "Ping Local Server Child", namespace: "mbarone/apps", author: "mbarone", vid:"generic-switch") {
-		capability "Actuator"
+	definition (name: "webCoRE Value Ties - Ave Temperature Group Child", namespace: "mbarone", author: "mbarone", vid:"generic-motion") {
+		capability "Temperature Measurement"
 		capability "Sensor"
-		capability "Switch"
 		capability "Health Check"
 
 		attribute "lastUpdated", "String"
 	}
 
 	tiles(scale: 2) {
-		multiAttributeTile(name:"switch", type: "generic"){
-			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
-				attributeState "on", label: 'Online', backgroundColor: "#79b821", icon:"st.Electronics.electronics18"
-				attributeState "off", label: 'Offline', backgroundColor: "#ffa81e", icon:"st.Electronics.electronics18"
+		multiAttributeTile(name:"temperatureChild", type: "generic"){
+			tileAttribute ("temperature", key: "PRIMARY_CONTROL") {
+				attributeState("temperature", label:'${currentValue}°', icon: "st.alarm.temperature.normal",
+					backgroundColors:[
+						[value: 31, color: "#153591"],
+						[value: 44, color: "#1e9cbb"],
+						[value: 59, color: "#90d2a7"],
+						[value: 74, color: "#44b621"],
+						[value: 84, color: "#f1d801"],
+						[value: 95, color: "#d04e00"],
+						[value: 96, color: "#bc2323"]
+					]
+				)
             }
  			tileAttribute("device.lastUpdated", key: "SECONDARY_CONTROL") {
     				attributeState("default", label:'    Last updated ${currentValue}',icon: "st.Health & Wellness.health9")
@@ -47,7 +55,7 @@ metadata {
 }
 
 def parse(String description) {
-    log.trace "parse(${description}) called"
+    //log.trace "parse(${description}) called"
 	def parts = description.split(" ")
     def name  = parts.length>0?parts[0].trim():null
     def value = parts.length>1?parts[1].trim():null

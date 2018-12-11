@@ -20,7 +20,7 @@
  */
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "Simulated Contact Sensor - custom", namespace: "mbarone/apps", author: "mbarone", vid:"generic-contact") {
+	definition (name: "Simulated Contact Sensor custom", namespace: "mbarone", author: "mbarone", vid:"generic-contact") {
 		capability "Contact Sensor"
 		capability "Sensor"
 		capability "Health Check"

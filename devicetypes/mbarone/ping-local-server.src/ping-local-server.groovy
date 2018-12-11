@@ -20,7 +20,7 @@
  
 
 metadata {
-	definition (name: "Ping Local Server", namespace: "mbarone/apps", author: "mbarone", vid:"generic-switch") {
+	definition (name: "Ping Local Server", namespace: "mbarone", author: "mbarone", vid:"generic-switch") {
 		capability "Polling"
 		capability "Refresh"
 		capability "Sensor"
