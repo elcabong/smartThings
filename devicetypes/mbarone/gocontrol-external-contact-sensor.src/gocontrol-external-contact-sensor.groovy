@@ -39,6 +39,7 @@ metadata {
 		capability "Smoke Detector"
 		
 		attribute "primaryStatus", "string"
+		attribute "lastCheckin", "string"
 		attribute "lastOpen", "string"
 		attribute "lastClosed", "string"
 		
@@ -163,16 +164,16 @@ metadata {
 
 def open() {
 	handleContactEvent("open")
-	def nowDay = new Date().format("MMM dd", location.timeZone)
-	def nowTime = new Date().format("h:mm a", location.timeZone)
-	sendEvent(name: "lastOpen", value: nowDay + " at " + nowTime, displayed: false)	
+	def nowDay = new Date().format("MM/dd/yyyy", location.timeZone)
+	def nowTime = new Date().format("hh:mm:ss a", location.timeZone)
+	sendEvent(name: "lastOpen", value: nowDay + " " + nowTime, displayed: false)	
 }
 
 def close() {
 	handleContactEvent("closed")
-	def nowDay = new Date().format("MMM dd", location.timeZone)
-	def nowTime = new Date().format("h:mm a", location.timeZone)
-	sendEvent(name: "lastClosed", value: nowDay + " at " + nowTime, displayed: false)	
+	def nowDay = new Date().format("MM/dd/yyyy", location.timeZone)
+	def nowTime = new Date().format("hh:mm:ss a", location.timeZone)
+	sendEvent(name: "lastClosed", value: nowDay + " " + nowTime, displayed: false)	
 }
 
 def parse(String description) {		

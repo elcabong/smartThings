@@ -87,34 +87,75 @@ metadata {
 		capability "Sensor"
 		capability "Configuration"
 		capability "Contact Sensor"
+		capability "Water Sensor"
+		capability "Motion Sensor"
+		capability "Smoke Detector"
 		capability "Battery"
 		capability "Tamper Alert"
 		capability "Refresh"
 		capability "Health Check"
 		
+		command "open"
+		command "close"		
+
+		attribute "primaryStatus", "string"
+		attribute "secondaryStatus", "string"
 		attribute "internalContact", "enum", ["open", "closed"]
 		attribute "externalContact", "enum", ["open", "closed"]
 		attribute "lastCheckin", "string"
-		attribute "lastOpen", "string"
-		attribute "lastClosed", "string"
-		attribute "primaryStatus", "string"
 
-		// fingerprint deviceId: "0x2001", inClusters: "0x71,0x85,0x80,0x72,0x30,0x86,0x84"			
+		//fingerprint deviceId: "0x2001", inClusters: "0x71,0x85,0x80,0x72,0x30,0x86,0x84"		
 		fingerprint mfr:"014F", prod:"2001", model:"0102"
 	}
 
-	// simulator metadata
-	simulator {
-		status "open":  "command: 2001, payload: FF"
-		status "closed": "command: 2001, payload: 00"
-	}
-	
+	simulator {	}
+
 	preferences {
+		input "primaryStatusAttr", "enum",
+			title: "Primary Status Attribute:",
+			defaultValue: primaryStatusAttrSetting,
+			required: true,
+			options: primaryStatusOptions
+		input "secondaryStatusAttr", "enum",
+			title: "Secondary Status Attribute:",
+			defaultValue: secondaryStatusAttrSetting,
+			required: true,
+			options: secondaryStatusOptions
+		input "motionActiveEvent", "enum",
+			title: "Motion Active Event:",
+			defaultValue: motionActiveEventSetting,
+			required: false,
+			options: eventOptions
+		input "motionInactiveEvent", "enum",
+			title: "Motion Inactive Event:",
+			defaultValue: motionInactiveEventSetting,
+			required: false,
+			options: eventOptions
+		input "waterWetEvent", "enum",
+			title: "Water Wet Event:",
+			defaultValue: waterWetEventSetting,
+			required: false,
+			options: eventOptions
+		input "waterDryEvent", "enum",
+			title: "Water Dry Event:",
+			defaultValue: waterDryEventSetting,
+			required: false,
+			options: eventOptions
+		input "smokeDetectedEvent", "enum",
+			title: "Smoke Detected Event:",
+			defaultValue: smokeDetectedEventSetting,
+			required: false,
+			options: eventOptions
+		input "smokeClearEvent", "enum",
+			title: "Smoke Clear Event:",
+			defaultValue: smokeClearEventSetting,
+			required: false,
+			options: eventOptions
 		input "mainContactBehavior", "enum",
 			title: "Main Contact Behavior:",
-			defaultValue: "Last Changed",
-			required: false,
-			options: ["Last Changed Contact (Default)", "Internal Contact Only", "External Contact Only", "Both Contacts Closed", "Both Contacts Open"]		
+			defaultValue: mainContactBehaviorSetting,
+			required: true,
+			options: ["Last Changed Contact", "Internal Contact Only", "External Contact Only", "Both Contacts Closed", "Both Contacts Open"]
 		input "checkinInterval", "enum",
 			title: "Checkin Interval:",
 			defaultValue: checkinIntervalSetting,
@@ -133,33 +174,23 @@ metadata {
 			required: false,
 			displayDuringSetup: true,
 			options: checkinIntervalOptions.collect { it.name }
-		input "useExternalDevice", "bool", 
-			title: "Create Device for External Sensor?", 
-			defaultValue: false, 
-			displayDuringSetup: true, 
-			required: false
-		input "useGarageIcons", "bool", 
-			title: "Use Garage Icons?", 
-			defaultValue: false, 
-			displayDuringSetup: true, 
-			required: false
 		input "debugOutput", "bool", 
 			title: "Enable debug logging?", 
 			defaultValue: false, 
 			displayDuringSetup: true, 
 			required: false
 	}
-	
+
 	// UI tile definitions
 	tiles(scale: 2) {
-		multiAttributeTile(name:"contact", type: "generic", width: 6, height: 4){
+		multiAttributeTile(name:"mainTile", type: "generic", width: 6, height: 4){
 			tileAttribute ("device.primaryStatus", key: "PRIMARY_CONTROL") {
 				attributeState "closed", 
-					label:'closed', 
+					label:'Closed', 
 					icon:"st.contact.contact.closed", 
 					backgroundColor:"#00a0dc"
 				attributeState "open", 
-					label:'open', 
+					label:'Open', 
 					icon:"st.contact.contact.open", 
 					backgroundColor:"#e86d13"
 				attributeState "garage-closed", 
@@ -169,13 +200,71 @@ metadata {
 				attributeState "garage-open", 
 					label:'Open', 
 					icon:"st.doors.garage.garage-open", 
-					backgroundColor:"#e86d13"	
+					backgroundColor:"#e86d13"				
+				attributeState "inactive", 
+					label:'No Motion', 
+					icon:"st.motion.motion.inactive", 
+					backgroundColor:"#ffffff"
+				attributeState "active", 
+					label:'Motion', 
+					icon:"st.motion.motion.active", 
+					backgroundColor:"#00a0dc"
+				attributeState "dry", 
+					label:"Dry", 
+					icon:"st.alarm.water.dry", 
+					backgroundColor:"#ffffff"
+				attributeState "wet", 
+					label:"Wet", 
+					icon:"st.alarm.water.wet", 
+					backgroundColor:"#00a0dc"
+				attributeState "clear", 
+					label:'Clear', 
+					icon:"st.alarm.smoke.clear", 
+					backgroundColor:"#ffffff"
+				attributeState "detected", 
+					label:'Detected', 
+					icon:"st.alarm.smoke.smoke", 
+					backgroundColor:"#e86d13"
 			}
-		}
+			tileAttribute ("device.secondaryStatus", key: "SECONDARY_CONTROL") {
+				attributeState "", 
+					label:''
+				attributeState "closed", 
+					label:'CLOSED', 
+					icon:"st.contact.contact.closed"
+				attributeState "open", 
+					label:'OPEN', 
+					icon:"st.contact.contact.open"
+				attributeState "garage-closed", 
+					label:'CLOSED', 
+					icon:"st.doors.garage.garage-closed"
+				attributeState "garage-open", 
+					label:'OPEN', 
+					icon:"st.doors.garage.garage-open"
+				attributeState "inactive", 
+					label:'NO MOTION', 
+					icon:"st.motion.motion.inactive"
+				attributeState "active", 
+					label:'MOTION', 
+					icon:"st.motion.motion.active"
+				attributeState "dry", 
+					label:"DRY", 
+					icon:"st.alarm.water.dry"
+				attributeState "wet", 
+					label:"WET", 
+					icon:"st.alarm.water.wet"
+				attributeState "clear", 
+					label:'CLEAR', 
+					icon:"st.alarm.smoke.clear"
+				attributeState "detected", 
+					label:'DETECTED', 
+					icon:"st.alarm.smoke.smoke"
+			}
+		}	
 
 		valueTile("battery", "device.battery", decoration: "flat", width: 2, height: 2){
 			state "battery", label:'${currentValue}% \nBattery', unit:""
-		}
+		}		
 		standardTile("tampering", "device.tamper", width: 2, height: 2) {
 			state "detected", label:"Tamper", backgroundColor: "#e86d13"
 			state "clear", label:"No \nTamper", backgroundColor: "#cccccc"			
@@ -183,93 +272,52 @@ metadata {
 		standardTile("refresh", "device.refresh", width: 2, height: 2) {
 			state "default", label: "Refresh", action: "refresh", icon:"st.secondary.refresh-icon"
 		}
-		
-		valueTile("lastCheckin", "device.lastCheckin", decoration: "flat", width: 2, height: 2){
-			state "lastCheckin", label:'Checked In \n\n${currentValue}'
-		}
-		
-		valueTile("lastOpen", "device.lastOpen", decoration: "flat", width: 2, height: 2){
-			state "lastOpen", label:'Opened \n\n${currentValue}'
-		}
-		
-		valueTile("lastClosed", "device.lastClosed", decoration: "flat", width: 2, height: 2){
-			state "lastClosed", label:'Closed \n\n${currentValue}'
-		}
-		
-		valueTile("battery", "device.battery", decoration: "flat", width: 2, height: 2){
-			state "battery", label:'${currentValue}% \nBattery', unit:""
-		}
-		
-		main("contact")
-		details(["contact", "battery", "tampering", "refresh", "lastOpen", "lastClosed", "lastCheckin"])
+
+		main("mainTile")
+		details(["mainTile", "battery", "tampering", "refresh"])
 	}
 }
 
 def updated() {	
-	if (!isDuplicateCommand(state.lastUpdated, 3000)) {
+	if (!isDuplicateCommand(state.lastUpdated, 1000)) {
 		state.lastUpdated = new Date().time
-		logTrace "updated()"
-		
-		if (useExternalDeviceSetting && !getChildDevices()) {
-			createChildDevice()
-			def child = getChildDevice()
-			if (child) {
-				log.debug "Updating"
-				child.update()
-			}
-		}
-		
-		if (!device.currentValue("primaryStatus") || useGarageIconsSetting != state.useGarageIcons) {
-			state.useGarageIcons = useGarageIconsSetting
-			sendEvent(createPrimaryStatusEventMap(device.currentValue("contact")))
-		}
-		
-	}
-}
 
-private void createChildDevice() {
-	try {
-		logDebug "Creating Child Device"
-		def options = [
-			completedSetup: true, 
-			label: "${device.label} - External",
-			isComponent: false
-		]
-		addChildDevice("mbarone", "GoControl External Contact Sensor", childDeviceNetworkId, null, options)	
+		refreshMainTile()
 	}
-	catch (e) {
-		log.warn("You need to install the GoControl External Contact Sensor DTH in order to use this feature.\n$e")
-	}
-}
-
-def uninstalled() {
-	logTrace "Executing uninstalled()"
-	devices?.each {
-		logDebug "Removing ${it.displayName}"
-		deleteChildDevice(it.deviceNetworkId)
-	}
-}
-
-def childUninstalled() {
-	// Required to prevent warning on uninstall.
-}
-
-private getChildDeviceNetworkId() {
-	return "${device.deviceNetworkId}-ext"
 }
 
 def configure() {	
 	logTrace "configure()"
 	def cmds = []
-	
+
+	def mainTileChanged = false
 	if (!device.currentValue("contact")) {
 		sendEvent(name: "contact", value: "open", isStateChange: true, displayed: false)
-		sendEvent(createPrimaryStatusEventMap("open"))
+		mainTileChanged = true
 	}
-	else if (!device.currentValue("primaryStatus")) {
-		sendEvent(createPrimaryStatusEventMap(device.currentValue("contact")))
+
+	if (!device.currentValue("motion")) {
+		def motionVal = settings?.motionActiveEvent == "default" ? "active" : "inactive"
+		sendEvent(name: "motion", value: "$motionVal", isStateChange: true, displayed: false)
+		mainTileChanged = true
 	}
-	
+
+	if (!device.currentValue("water")) {
+		def waterVal = settings?.waterWetEvent == "default" ? "wet" : "dry"
+		sendEvent(name: "water", value: "$waterVal", isStateChange: true, displayed: false)
+		mainTileChanged = true
+	}
+
+	if (!device.currentValue("smoke")) {
+		def smokeVal = settings?.smokeDetectedEvent == "default" ? "detected" : "clear"
+		sendEvent(name: "smoke", value: "$smokeVal", isStateChange: true, displayed: false)
+		mainTileChanged = true
+	}
+
+	if (mainTileChanged) {
+		refreshMainTile()
+	}
+
 	if (!state.isConfigured) {
 		state.isConfigured = true
 		logTrace "Waiting 1 second because this is the first time being configured"
@@ -282,11 +330,26 @@ def configure() {
 		cmds << wakeUpIntervalSetCmd(checkinIntervalSettingSeconds)
 		cmds << wakeUpIntervalGetCmd()
 	}
-	
-	if (canReportBattery()) {
+
+	if (!isDuplicateCommand(state.lastBatteryReport, (batteryReportingIntervalSettingMinutes * 60 * 1000))) {
 		cmds << batteryGetCmd()
 	}	
+
 	return cmds ? delayBetween(cmds, 500) : []
+}
+
+private refreshMainTile() {
+	logTrace "refreshMainTile()"
+	logDebug "INTERNAL"
+	createContactEventMaps("internalContact", device.currentValue("internalContact"))?.each {
+		logDebug it
+		sendEvent(it)
+	}
+	logDebug "EXTERNAL"
+	createContactEventMaps("externalContact", device.currentValue("externalContact"))?.each {
+		logDebug it
+		sendEvent(it)
+	}    
 }
 
 // Required for HealthCheck Capability, but doesn't actually do anything because this device sleeps.
@@ -294,20 +357,29 @@ def ping() {
 	logDebug "ping()"	
 }
 
+def open() {
+	sendEvent(name: "contact", value: "open", isStateChange: true, displayed: false)
+}
+
+def close() {
+	sendEvent(name: "contact", value: "closed", isStateChange: true, displayed: false)
+}
+
 // Resets the tamper attribute to clear and requests the device to be refreshed.
 def refresh() {	
 	if (device.currentValue("tamper") != "clear") {
-		sendEvent(getEventMap("tamper", "clear"))		
+		sendEvent(createEventMap("tamper", "clear"))		
 	}
 	else {
 		logDebug "The battery will be refresh the next time the device wakes up.  If you want the battery to update immediately, open the back cover of the device, wait until the red light turns solid, and then put the cover back on."
 		state.lastBatteryReport = null
 	}
+    refreshMainTile()
 }
 
-def parse(String description) {		
+def parse(String description) {
 	def result = []
-	
+
 	if (!isDuplicateCommand(state.lastCheckin, 60000)) {
 		state.lastCheckin = new Date().time
 		sendEvent(name: "lastCheckin", value: convertToLocalTimeString(new Date()), displayed: false, isStateChange: true)
@@ -325,7 +397,7 @@ def parse(String description) {
 		else {
 			logDebug "Unable to parse description: $description"
 		}
-	}	
+	}
 	return result
 }
 
@@ -346,13 +418,13 @@ def zwaveEvent(physicalgraph.zwave.commands.wakeupv2.WakeUpNotification cmd)
 {
 	logTrace "WakeUpNotification: $cmd"
 	def cmds = []
-	
+
 	cmds += configure()
-	
+
 	if (cmds) {
 		cmds << "delay 1000"
 	}
-	
+
 	cmds << wakeUpNoMoreInfoCmd()
 	return sendResponse(cmds)
 }
@@ -360,15 +432,15 @@ def zwaveEvent(physicalgraph.zwave.commands.wakeupv2.WakeUpNotification cmd)
 def zwaveEvent(physicalgraph.zwave.commands.wakeupv2.WakeUpIntervalReport cmd) {
 	logTrace "WakeUpIntervalReport: $cmd"
 	def result = []
-	
+
 	state.checkinIntervalSeconds = cmd.seconds
-	
+
 	// Set the Health Check interval so that it reports offline 5 minutes after it missed the # of checkins specified in the settings.
 	def threshold = convertOptionSettingToInt(missedCheckinsOptions, missedCheckinsSetting)
 	def checkInterval = ((cmd.seconds * threshold) + (5 * 60))
-	
+
 	result << createEvent(name: "checkInterval", value: checkInterval, displayed: false, data: [protocol: "zwave", hubHardwareId: device.hub.hardwareID])
-	
+
 	return result
 }
 
@@ -381,12 +453,6 @@ private sendResponse(cmds) {
 	return []
 }
 
-private canReportBattery() {
-	def reportEveryMS = (batteryReportingIntervalSettingMinutes * 60 * 1000)
-		
-	return (!state.lastBatteryReport || ((new Date().time) - state.lastBatteryReport > reportEveryMS)) 
-}
-
 def zwaveEvent(physicalgraph.zwave.commands.batteryv1.BatteryReport cmd) {
 	logTrace "BatteryReport: $cmd"
 	def val = (cmd.batteryLevel == 0xFF ? 1 : cmd.batteryLevel)
@@ -394,18 +460,21 @@ def zwaveEvent(physicalgraph.zwave.commands.batteryv1.BatteryReport cmd) {
 		val = 100
 	}
 	state.lastBatteryReport = new Date().time	
+	logDebug "Battery ${val}%"
+
 	def isNew = (device.currentValue("battery") != val)
-			
+
 	def result = []
 	result << createEvent(name: "battery", value: val, unit: "%", display: isNew, isStateChange: isNew)
 
 	return result
 }
 
+
 def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicReport cmd) {
 	logTrace "BasicReport: $cmd"	
 	def result = []
-	
+
 	if (device.currentValue("internalContact")) {
 		result += handleContactEvent("internalContact", cmd.value)
 	}
@@ -434,6 +503,8 @@ def zwaveEvent(physicalgraph.zwave.commands.notificationv3.NotificationReport cm
 			case 0xFE:
 				result += handleContactEvent(cmd.v1AlarmLevel, "externalContact")
 				break
+			default:
+				logDebug "Unexpected NotificationReport: $cmd"
 		}
 	}
 	return result
@@ -441,70 +512,60 @@ def zwaveEvent(physicalgraph.zwave.commands.notificationv3.NotificationReport cm
 
 private handleTamperEvent(alarmLevel) {
 	def result = []		
-	
-	if (alarmLevel == 0xFF) {		
-		logDebug "Tamper Detected"
-		result << createEvent(getEventMap("tamper", "detected"))
-	}
-	
+
+	if (alarmLevel == 0xFF) {
+		logTrace "Tamper Detected"
+		result << createEvent(createEventMap("tamper", "detected"))
+	}	
+
 	return result
 }
 
 private handleContactEvent(alarmLevel, attr) {
 	def result = []
 	def val = (alarmLevel == 0xFF) ? "open" : "closed"
-	def otherVal = device.currentValue((attr == "internalContact") ? "externalContact" : "internalContact")
-	def displayed = null
-	if (settings?.mainContactBehavior?.contains("Only")) {
-		displayed = false
-	}
-	
-	if (attr == "externalContact") {
-		handleChildContactEvent(val)
-	}
 
-	result << createEvent(getEventMap("$attr", val, displayed))
-	
-	def mainVal = getMainContactVal(attr, val, otherVal)	
-	if (mainVal) {
-		result << createEvent(getEventMap("contact", mainVal))
-		result << createEvent(createPrimaryStatusEventMap(mainVal))		
-	}
-	
-	sendEvent(name: "last${mainVal?.capitalize()}", value: convertToLocalTimeString(new Date()), displayed: false, isStateChange: true)
-	
+	createContactEventMaps(attr, val)?.each {
+		result << createEvent(it)
+	}	
+
 	return result
 }
 
-private createPrimaryStatusEventMap(val) {
-	if (useGarageIconsSetting) {
-		val = "garage-${val}"
-	}
-	return getEventMap("primaryStatus", val, false)
-}
+private createContactEventMaps(attr, val) {
+	def result = []
 
-private void handleChildContactEvent(val) {
-	def child = getChildDevice()
-	if (child ) {
-		logDebug "Executing Child ${val.capitalize()}()"
-		if (val == "open") {
-			child?.open()
-		}
-		else {
-			child?.close()
-		}
-	}
-	return null
-}
+	def internalActive = (attr == "internalContact")
+	def otherVal = device.currentValue(internalActive ? "externalContact" : "internalContact")
 
-private getChildDevice() {
-	return getChildDevices()?.find { it && "${it}" != "null" }
+	def displayed = null
+	if (mainContactBehaviorSetting.contains("Only")) {
+		displayed = false
+	}
+
+	result << createEventMap("$attr", val, displayed)
+
+	def mainVal = getMainContactVal(attr, val, otherVal)	
+	if (mainVal) {
+		result << createEventMap("contact", mainVal)
+	}
+
+	// Create water, motion, and status events based off these values instead of the device attributes due to race condition.
+	def eventData = [
+		activeAttr: attr,
+		contactVal: mainVal,
+		internalVal: (internalActive ? val : otherVal ),
+		externalVal: (internalActive ? otherVal : val )
+	]
+	result += createOtherEventMaps(eventData)
+
+	return result
 }
 
 private getMainContactVal(activeAttr, activeVal, otherVal) {
 	def mainVal
-	switch (settings?.mainContactBehavior) {
-		case "Last Changed Contact (Default)":
+	switch (mainContactBehaviorSetting) {
+		case "Last Changed Contact":
 			mainVal = activeVal
 			break
 		case "Internal Contact Only":
@@ -529,22 +590,119 @@ private getMainContactVal(activeAttr, activeVal, otherVal) {
 	return mainVal
 }
 
-private getEventMap(eventName, newVal, displayed=null) {	
-	def isNew = device.currentValue(eventName) != newVal
-	def desc = "${device.displayName} is ${newVal}"
-	
-	displayed = (displayed != null) ? displayed : isNew
-	
-	if (displayed) {
-		logDebug "${desc}"
+private createOtherEventMaps(eventData) {
+	def result = []
+	eventData.motionVal = determineMotionVal(eventData)
+	if (eventData.motionVal) {
+		result += createEventMap("motion", eventData.motionVal)
 	}
-	
+
+	eventData.waterVal = determineWaterVal(eventData)
+	if (eventData.waterVal) {
+		result << createEventMap("water", eventData.waterVal)
+	}
+
+	eventData.smokeVal = determineSmokeVal(eventData)
+	if (eventData.smokeVal) {
+		result << createEventMap("smoke", eventData.smokeVal)
+	}
+
+	result += createMainTileEventMaps(eventData)
+
+	return result
+}
+
+private determineMotionVal(eventData) {
+	if (eventSettingMatchesEventVal(motionActiveEventSetting, eventData)) {
+		return "active"
+	}
+	else if (eventSettingMatchesEventVal(motionInactiveEventSetting, eventData)) {
+		return "inactive"
+	}
+	else {
+		return null
+	}	
+}
+
+private determineWaterVal(eventData) {
+	if (eventSettingMatchesEventVal(waterWetEventSetting, eventData)) {
+		return "wet"
+	}
+	else if (eventSettingMatchesEventVal(waterDryEventSetting, eventData)) {
+		return "dry"
+	}
+	else {
+		return null
+	}
+}
+
+private determineSmokeVal(eventData) {
+	if (eventSettingMatchesEventVal(smokeDetectedEventSetting, eventData)) {
+		return "detected"
+	}
+	else if (eventSettingMatchesEventVal(smokeClearEventSetting, eventData)) {
+		return "clear"
+	}
+	else {
+		return null
+	}
+}
+
+private eventSettingMatchesEventVal(eventSetting, eventData) {
+	if (eventSetting == "default") {
+		return true
+	}
+	else {
+		def eventVal
+		switch (eventSetting) {
+			case { it?.startsWith("contact") }:
+				eventVal = eventData.contactVal
+				break
+			case { it?.startsWith("internal") }:
+				eventVal = eventData.internalVal
+				break
+			case { it?.startsWith("external") }:
+				eventVal = eventData.externalVal
+				break
+			default:
+				eventVal = null
+		}
+		return (eventVal && eventSetting.endsWith(".${eventVal}"))
+	}
+}
+
+private createMainTileEventMaps(eventData) {
+	def result = []
+
+	def data = [
+		["none", ""],
+		["motion", eventData.motionVal],
+		["water", eventData.waterVal],
+		["smoke", eventData.smokeVal],
+		["contact", eventData.contactVal],
+		["contact-garage", "garage-${eventData.contactVal}"],
+		["internalContact", eventData.internalVal],
+		["externalContact", eventData.externalVal]
+	]
+
+	[["primaryStatus", primaryStatusAttrSetting], ["secondaryStatus", secondaryStatusAttrSetting]].each { status, statusAttr ->
+		def eventVal = data.find { attr, val -> "$statusAttr" == "$attr" }		
+		if (eventVal && eventVal[1] != null) {
+			result << createEventMap("${status}", eventVal[1], false)
+		}
+	}
+
+	return result
+}
+
+private createEventMap(eventName, newVal, displayed=null) {	
+	def isNew = device.currentValue(eventName) != newVal
+	def desc = "${eventName.capitalize()} is ${newVal}"
+	logDebug "${desc}"
 	[
 		name: eventName, 
 		value: newVal, 
-		displayed: displayed,
-		isStateChange: true,
-		descriptionText: desc
+		displayed: (displayed != null) ? displayed : isNew
 	]
 }
 
@@ -552,13 +710,8 @@ def zwaveEvent(physicalgraph.zwave.Command cmd) {
 	logDebug "Unhandled Command: $cmd"
 }
 
-private basicGetCmd() {
-	return zwave.basicV1.basicGet().format()
-}
-
-private batteryGetCmd() {
-	logTrace "Requesting battery report"
-	return zwave.batteryV1.batteryGet().format()
+private wakeUpNoMoreInfoCmd() {
+	return zwave.wakeUpV2.wakeUpNoMoreInformation().format()
 }
 
 private wakeUpIntervalSetCmd(val) {
@@ -569,17 +722,46 @@ private wakeUpIntervalGetCmd() {
 	return zwave.wakeUpV2.wakeUpIntervalGet().format()
 }
 
-private wakeUpNoMoreInfoCmd() {
-	return zwave.wakeUpV2.wakeUpNoMoreInformation().format()
+private batteryGetCmd() {
+	logTrace "Requesting battery report"
+	return zwave.batteryV1.batteryGet().format()
 }
 
 // Settings
-private getUseExternalDeviceSetting() {
-	return settings?.useExternalDevice ?: false
+private getPrimaryStatusAttrSetting() {
+	return settings?.primaryStatusAttr ?: "contact"
 }
 
-private getUseGarageIconsSetting() {
-	return settings?.useGarageIcons ?: false
+private getSecondaryStatusAttrSetting() {	
+	return settings?.secondaryStatusAttr ?: "none"
+}
+
+private getMotionActiveEventSetting() {
+	return settings?.motionActiveEvent ?: "none"
+}
+
+private getMotionInactiveEventSetting() {
+	return settings?.motionInactiveEvent ?: "default"
+}
+
+private getWaterWetEventSetting() {
+	return settings?.waterWetEvent ?: "none"
+}
+
+private getWaterDryEventSetting() {
+	return settings?.waterDryEvent ?: "default"
+}
+
+private getSmokeDetectedEventSetting() {
+	return settings?.smokeDetectedEvent ?: "none"
+}
+
+private getSmokeClearEventSetting() {
+	return settings?.smokeClearEvent ?: "default"
+}
+
+private getMainContactBehaviorSetting() {
+	return settings?.mainContactBehavior ?: "Last Changed Contact"
 }
 
 private getCheckinIntervalSettingSeconds() {
@@ -600,6 +782,46 @@ private getBatteryReportingIntervalSettingMinutes() {
 
 private getBatteryReportingIntervalSetting() {
 	return settings?.batteryReportingInterval ?: findDefaultOptionName(checkinIntervalOptions)
+}
+
+
+// Options 
+private getEventOptions() {
+	return [
+		"default",
+		"none", 
+		"contact.open",
+		"contact.closed",
+		"externalContact.open", 
+		"externalContact.closed", 
+		"internalContact.open", 
+		"internalContact.closed"
+	]
+}
+
+private getPrimaryStatusOptions() {
+	return [
+		"contact",
+		"contact-garage",
+		"externalContact",
+		"internalContact", 
+		"motion",
+		"smoke", 
+		"water"
+	]
+}
+
+private getSecondaryStatusOptions() {
+	return [
+		"none",
+		"contact",
+		"contact-garage",
+		"externalContact",
+		"internalContact", 
+		"motion",
+		"smoke",
+		"water"
+	]
 }
 
 private getCheckinIntervalOptions() {
@@ -629,6 +851,20 @@ private getMissedCheckinsOptions() {
 	return items
 }
 
+private convertToLocalTimeString(dt) {
+	def timeZoneId = location?.timeZone?.ID
+	if (timeZoneId) {
+		return dt.format("MM/dd/yyyy hh:mm:ss a", TimeZone.getTimeZone(timeZoneId))
+	}
+	else {
+		return "$dt"
+	}	
+}
+
+private isDuplicateCommand(lastExecuted, allowedMil) {
+	!lastExecuted ? false : (lastExecuted + allowedMil > new Date().time) 
+}
+
 private convertOptionSettingToInt(options, settingVal) {
 	return safeToInt(options?.find { "${settingVal}" == it.name }?.value, 0)
 }
@@ -648,20 +884,6 @@ private getDefaultOptionSuffix() {
 
 private safeToInt(val, defaultVal=-1) {
 	return "${val}"?.isInteger() ? "${val}".toInteger() : defaultVal
-}
-
-private convertToLocalTimeString(dt) {
-	def timeZoneId = location?.timeZone?.ID
-	if (timeZoneId) {
-		return dt.format("MM/dd/yyyy hh:mm:ss a", TimeZone.getTimeZone(timeZoneId))
-	}
-	else {
-		return "$dt"
-	}	
-}
-
-private isDuplicateCommand(lastExecuted, allowedMil) {
-	!lastExecuted ? false : (lastExecuted + allowedMil > new Date().time) 
 }
 
 private logDebug(msg) {
