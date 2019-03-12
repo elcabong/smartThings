@@ -303,12 +303,6 @@ def refresh() {
 		logDebug "The battery will be refresh the next time the device wakes up.  If you want the battery to update immediately, open the back cover of the device, wait until the red light turns solid, and then put the cover back on."
 		state.lastBatteryReport = null
 	}
-	
-	// new edit for state refresh
-	def cmds = []
-	//cmds << command(zwave.sensorBinaryV2.sensorBinaryGet(sensorType: zwave.sensorBinaryV2.SENSOR_TYPE_DOOR_WINDOW))
-	cmds << command(zwave.sensorBinaryV2.sensorBinaryGet(sensorType: 0x30))
-	return sendResponse(cmds)	
 }
 
 def parse(String description) {
