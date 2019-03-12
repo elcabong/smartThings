@@ -305,9 +305,23 @@ def refresh() {
 	}
 	
 	// new edit for state refresh
-	def cmds = []
-	cmds << command(zwave.sensorBinaryV2.sensorBinaryGet(sensorType: zwave.sensorBinaryV2.SENSOR_TYPE_DOOR_WINDOW))
-	return sendResponse(cmds)	
+
+
+	def result = []
+	
+	if (device.currentValue("internalContact")) {
+		result += handleContactEvent("internalContact", cmd.value)
+	}
+	if (device.currentValue("externalContact")) {
+		result += handleContactEvent("externalContact", cmd.value)
+	}
+	return result
+
+
+//	def cmds = []
+	//cmds << command(zwave.sensorBinaryV2.sensorBinaryGet(sensorType: zwave.sensorBinaryV2.SENSOR_TYPE_DOOR_WINDOW))
+//	cmds << command(zwave.sensorBinaryV2.sensorBinaryGet(sensorType: 0x0C))
+//	return sendResponse(cmds)	
 }
 
 def parse(String description) {
