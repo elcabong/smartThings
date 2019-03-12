@@ -235,7 +235,7 @@ private void createChildDevice() {
 			label: "${device.label} - External",
 			isComponent: false
 		]
-		addChildDevice("krlaframboise", "GoControl External Contact Sensor", childDeviceNetworkId, null, options)	
+		addChildDevice("mbarone", "GoControl External Contact Sensor", childDeviceNetworkId, null, options)	
 	}
 	catch (e) {
 		log.warn("You need to install the GoControl External Contact Sensor DTH in order to use this feature.\n$e")
