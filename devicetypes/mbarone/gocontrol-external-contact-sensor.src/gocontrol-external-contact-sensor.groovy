@@ -165,11 +165,11 @@ metadata {
 		}		
 
 		standardTile("forceOpen", "device.open", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
-			state "default", label:'Force Open', action:"open", icon:"st.contact.contact.open", backgroundColor:"#00a0dc"
+			state "default", label:'Set Open', action:"open", icon:"st.contact.contact.open", backgroundColor:"#00a0dc"
 		}		
 
 		standardTile("forceClose", "device.close", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
-			state "default", label:'Force Closed', action:"close", icon:"st.contact.contact.closed", backgroundColor:"#00a0dc"
+			state "default", label:'Set Closed', action:"close", icon:"st.contact.contact.closed", backgroundColor:"#00a0dc"
 		}
 		
 		main("mainTile")
