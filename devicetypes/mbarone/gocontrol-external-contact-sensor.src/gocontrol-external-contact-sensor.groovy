@@ -155,10 +155,25 @@ metadata {
 		
 		valueTile("lastClosed", "device.lastClosed", decoration: "flat", width: 2, height: 2){
 			state "lastClosed", label:'Closed \n\n${currentValue}'
+		}
+
+		standardTile("empty", "null", decoration: "flat", width: 2, height: 2) {
+			state "emptySmall", label:'', defaultState: true
+		}
+		standardTile("emptyS", "null", decoration: "flat", width: 2, height: 1) {
+			state "emptySmall", label:'', defaultState: true
 		}		
 
+		standardTile("forceOpen", "device.open", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
+			state "default", label:'', action:"open", icon:"st.contact.contact.open", backgroundColor:"#00a0dc"
+		}		
+
+		standardTile("forceClose", "device.close", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
+			state "default", label:'', action:"close", icon:"st.contact.contact.close", backgroundColor:"#00a0dc"
+		}
+		
 		main("mainTile")
-		details(["mainTile", "lastOpen", "lastClosed"])
+		details(["mainTile", "lastOpen", "empty", "lastClosed","emptyS","emptyS","emptyS","forceOpen","empty","forceClose"])
 	}
 }
 
