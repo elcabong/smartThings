@@ -13,7 +13,7 @@
  */
 metadata {
     // Automatically generated. Make future change here.
-    definition (name: "Sim Temperature Sensor", namespace: "mbarone", author: "mbarone", mnmn: "SmartThings", vid: "generic-radiator-thermostat-2", ocfDeviceType: "oic.d.thermostat") {
+    definition (name: "Simulated Temperature Sensor", namespace: "mbarone", author: "mbarone", mnmn: "SmartThings", vid: "generic-radiator-thermostat-2", ocfDeviceType: "oic.d.thermostat") {
         capability "Temperature Measurement"
         capability "Sensor"
         capability "Health Check"
