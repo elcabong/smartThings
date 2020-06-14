@@ -23,7 +23,7 @@
  * 
  */
 metadata {
-	definition (name: "webCoRE Value Tiles - Button Group Child", namespace: "mbarone/apps", author: "mbarone", vid:"generic-switch") {
+	definition (name: "webCoRE Value Tiles - Button Group Child", namespace: "mbarone", author: "mbarone", vid:"generic-switch") {
 		capability "Actuator"
 		capability "Sensor"
 		capability "Switch"
