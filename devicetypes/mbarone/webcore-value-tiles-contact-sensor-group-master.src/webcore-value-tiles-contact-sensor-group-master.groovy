@@ -131,7 +131,7 @@ metadata {
  private void createChildDevice(String deviceName) {
 	log.trace "createChildDevice:  Creating Child Device '${device.displayName} (${deviceName})'"
 	try {
-		def deviceHandlerName = "webCoRE Value Tiles - Contact Sensor Group Child"
+		def deviceHandlerName = "webCoRE Value Tiles Contact Sensor Group Child"
 		addChildDevice(deviceHandlerName,
 						"${device.deviceNetworkId}-${deviceName}",
 						null,

@@ -119,7 +119,7 @@ metadata {
  private void createChildDevice(String deviceName) {
 	//log.trace "createChildDevice:  Creating Child Device '${device.displayName} (${deviceName})'"
 	try {
-		def deviceHandlerName = "webCoRE Value Tiles - Button Group Child"
+		def deviceHandlerName = "webCoRE Value Tiles Button Group Child"
 		addChildDevice(deviceHandlerName,
 						"${device.deviceNetworkId}-${deviceName}",
 						null,
