@@ -23,7 +23,7 @@
  * 
  */
 metadata {
-	definition (name: "webCoRE Value Tiles - Ave Temperature Group Child", namespace: "mbarone", author: "mbarone", ocfDeviceType: "oic.d.thermostat") {
+	definition (name: "webCoRE Value Tiles Ave Temperature Group Child", namespace: "mbarone", author: "mbarone", ocfDeviceType: "oic.d.thermostat") {
 		capability "Temperature Measurement"
 		capability "Sensor"
 		capability "Health Check"

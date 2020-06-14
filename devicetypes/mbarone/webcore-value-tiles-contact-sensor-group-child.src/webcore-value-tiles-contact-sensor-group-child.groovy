@@ -23,7 +23,7 @@
  * 
  */
 metadata {
-	definition (name: "webCoRE Value Tiles - Contact Sensor Group Child", namespace: "mbarone", author: "mbarone") {
+	definition (name: "webCoRE Value Tiles Contact Sensor Group Child", namespace: "mbarone", author: "mbarone") {
 		capability "Contact Sensor"
 		capability "Sensor"
         capability "Refresh"
