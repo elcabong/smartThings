@@ -16,8 +16,7 @@
  *
  *	To be used with the following webCoRE pistons:
  *	 import code  -    piston name
- *      0tkf   - "Average Temperatures"
- *
+ *      hi0z7     - "Average Temperatures"
  *
  *	See discussion thread:
  *		https://community.smartthings.com/t/release-custom-dth-and-webcore-pistons-for-grouping-like-sensors-and-giving-1-aggregated-status-for-the-group/134270
@@ -26,7 +25,7 @@
  *
  */
 metadata {
- 	definition (name: "webCoRE Value Ties - Ave Temperature Group Master", namespace: "mbarone", author: "mbarone", vid:"generic-motion") {
+ 	definition (name: "webCoRE Value Tiles - Ave Temperature Group Master", namespace: "mbarone/apps", author: "mbarone", ocfDeviceType: "oic.d.thermostat", mcdSync: true) {
 		capability "Temperature Measurement"
 		capability "Sensor"
 		capability "Switch"
@@ -42,9 +41,9 @@ metadata {
     }
 	
  	tiles(scale: 2){
-		multiAttributeTile(name:"Main", type: "generic", width: 6, height: 4) {
-			tileAttribute ("temperature", key: "PRIMARY_CONTROL") {
-				attributeState("temperature", label:'${currentValue}°',
+		multiAttributeTile(name:"temperature", type: "generic", width: 6, height: 4) {
+			tileAttribute ("device.temperature", key: "PRIMARY_CONTROL") {
+				attributeState("temperature", label:'${currentValue}°', icon: "st.alarm.temperature.normal", unit:"F",
 					backgroundColors:[
 						[value: 31, color: "#153591"],
 						[value: 44, color: "#1e9cbb"],
@@ -68,8 +67,8 @@ metadata {
 			state "default", label:'Remove Children', action:"removeChildren"
 		}
 		childDeviceTiles("All")
-		main(["Main"])
-		details(["Main","Refresh","Details","All","removeChildren"])
+		main(["temperature"])
+		details(["temperature","Refresh","Details","All","removeChildren"])
 	}
  }
  def parse(String description){
@@ -77,7 +76,7 @@ metadata {
     createEvent(name: pair[0].trim(), value: pair[1].trim(), unit:"F")
  }
  def changeMain (param, details){
-	sendEvent("name":"temperature", "value": param)
+	sendEvent("name":"temperature", "value": param, unit:"F")
 	sendEvent("name":"Details", "value":details)
  }
  def changeChildValue (title, param) {
@@ -131,7 +130,7 @@ metadata {
  private void createChildDevice(String deviceName) {
 	log.trace "createChildDevice:  Creating Child Device '${device.displayName} (${deviceName})'"
 	try {
-		def deviceHandlerName = "webCoRE Value Ties - Ave Temperature Group Child"
+		def deviceHandlerName = "webCoRE Value Tiles - Ave Temperature Group Child"
 		addChildDevice(deviceHandlerName,
 						"${device.deviceNetworkId}-${deviceName}",
 						null,
@@ -169,8 +168,8 @@ metadata {
  	sendEvent(name: "switch", value: "off")
  }
  def on(){
- 	sendEvent(name: "switch", value: "on")
+    sendEvent(name: "switch", value: "on")
  }
  def off(){
- 	sendEvent(name: "switch", value: "off")
+    sendEvent(name: "switch", value: "off")
  }

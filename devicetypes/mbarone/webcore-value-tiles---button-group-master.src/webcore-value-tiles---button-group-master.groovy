@@ -14,7 +14,7 @@
  *
  *	To be used with the following webCoRE piston:
  *	 import code  -    piston name
- *      50bko   - "All Exterior Doors"
+ *       us47     -   "Setting Button Control"
  *
  *	See discussion thread:
  *		https://community.smartthings.com/t/release-custom-dth-and-webcore-pistons-for-grouping-like-sensors-and-giving-1-aggregated-status-for-the-group/134270
@@ -23,64 +23,56 @@
  *
  */
 metadata {
- 	definition (name: "webCoRE Value Ties - Contact Sensor Group Master", namespace: "mbarone", author: "mbarone", vid:"generic-contact") {
-		capability "Contact Sensor"
+ 	definition (name: "webCoRE Value Tiles - Button Group Master", namespace: "mbarone/apps", author: "mbarone", vid:"generic-switch") {
 		capability "Sensor"
 		capability "Switch"
 		capability "Health Check"
 		
-		attribute "Main","string"
+		attribute "Child","string"
 		attribute "Details","string"
 		
-		command "changeMain"
 		command "changeChildValue"
-		command "open"
-		command "close"
 		command "On"
 		command "Off"
 		command "removeChildren"
     }
 	
  	tiles(scale: 2){
-		multiAttributeTile(name:"Main", type: "generic", width: 6, height: 4) {
-			tileAttribute ("device.Main", key: "PRIMARY_CONTROL") {
-				attributeState("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00A0DC")
-				attributeState("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
-			}
-			tileAttribute ("device.openDevices", key: "SECONDARY_CONTROL") {
-				attributeState "default", label:'${currentValue} Open Devices', icon: "st.contact.contact.open"
-				attributeState "1", label:'${currentValue} Open Device', icon: "st.contact.contact.open"
-			}
-		}
+		standardTile("Main", "device.Main", inactiveLabel: false, width: 3, height: 1, decoration: "flat", wordWrap: true) {
+            state "default", label:'', icon:"st.Office.office7"
+        }
+
+        standardTile("Details", "device.Details", width: 5, height: 1, decoration: "flat", wordWrap: true) {
+            state "default", label:'${currentValue}'
+        }
+		
         standardTile("Refresh", "device.switch", inactiveLabel: false, width: 2, height: 1, decoration: "flat", wordWrap: true) {
             state "off", action:"On", label: "Refresh", icon:"st.secondary.refresh"
             state "on", action:"Off", label: "Refreshing", icon:"st.motion.motion.active"
         }
-        standardTile("Details", "device.Details", inactiveLabel: false, width: 4, height: 1, decoration: "flat", wordWrap: true) {
-            state "default", label:'${currentValue}'
-        }
-		standardTile("removeChildren", "device.removeChildren", inactiveLabel: false, width: 6, height: 1, decoration: "flat", wordWrap: true){
+		standardTile("removeChildren", "device.removeChildren", inactiveLabel: false, width: 4, height: 1, decoration: "flat", wordWrap: true){
 			state "default", label:'Remove Children', action:"removeChildren"
-		}
+		}		
+		standardTile("emptyS", "null", decoration: "flat", width: 2, height: 1) {
+			state "emptySmall", label:'', defaultState: true
+		}	
+		
+		
 		childDeviceTiles("All")
 		main(["Main"])
-		details(["Main","Refresh","Details","All","removeChildren"])
+		details(["All","Details","Refresh","removeChildren"])
 	}
  }
  def parse(String description){
  	def pair = description.split(":")
-    createEvent(name: pair[0].trim(), value: pair[1].trim(), unit:"F")
- }
- def changeMain (param, openDevices, details){
- 	sendEvent("name":"Main", "value":param)
-	sendEvent("name":"openDevices", "value":openDevices)
-	sendEvent("name":"Details", "value":details)
+    createEvent(name: pair[0].trim(), value: pair[1].trim())
  }
  def changeChildValue (title, param) {
+    sendEvent(name:"Details", value:"", displayed: false)
 	def childDevice = null
 	def name = title
 	def value = param
-	def deviceType = "contact"
+	def deviceType = "switch"
 	try {
 		childDevices.each {
 			try{
@@ -117,7 +109,7 @@ metadata {
             //log.debug "parse() found child device ${childDevice.deviceNetworkId}"
 			//log.debug "sending parse(${deviceType} ${value})"
             childDevice.parse("${deviceType} ${value}")
-			log.debug "${childDevice.deviceNetworkId} - name: ${name} (contact), value: ${value}"
+			//log.debug "${childDevice.deviceNetworkId} - name: ${name} (switch), value: ${value}"
 		}
 	}
 	catch (e) {
@@ -125,9 +117,9 @@ metadata {
 	}
  }
  private void createChildDevice(String deviceName) {
-	log.trace "createChildDevice:  Creating Child Device '${device.displayName} (${deviceName})'"
+	//log.trace "createChildDevice:  Creating Child Device '${device.displayName} (${deviceName})'"
 	try {
-		def deviceHandlerName = "webCoRE Value Ties - Contact Sensor Group Child"
+		def deviceHandlerName = "webCoRE Value Tiles - Button Group Child"
 		addChildDevice(deviceHandlerName,
 						"${device.deviceNetworkId}-${deviceName}",
 						null,
@@ -138,20 +130,13 @@ metadata {
 							componentName: "${deviceName}", 
 							componentLabel: "${deviceName}"
 						]
-					)	
+					)
+        sendEvent(name:"Details", value:"Child device created!  May take some time to display above.")
 	}
 	catch (e) {
         log.error "Child device creation failed with error = ${e}"
         state.alertMessage = "Child device creation failed. Please make sure that the '${deviceHandlerName}' is installed and published."
 	}
- }
- def open() {
-	//log.trace "open()"
-	sendEvent(name: "contact", value: "open")
- }
- def close() {
-	//log.trace "close()"
-    sendEvent(name: "contact", value: "closed")
  }
  def removeChildren(){
 	log.trace "removing any child devices"
@@ -164,8 +149,9 @@ metadata {
 			log.debug "Error deleting ${it.deviceNetworkId}: ${e}"
 		}
 	}
-	sendEvent("name":"Details", "value":"Child devices removed!  May take some time to update below.  Refresh when ready to re-build child devices, or wait until a device changes state.")
+	sendEvent(name:"Details", value:"Child devices removed!  May take some time to remove device.  Refresh when ready to re-build child devices, or wait until a device changes state.")
  }
+
  def On(){
  	sendEvent(name: "switch", value: "on")
  }

@@ -34,10 +34,12 @@ metadata {
 	) {
 		capability "Sensor"
 		capability "Contact Sensor"
-		capability "Water Sensor"
+        capability "Health Check"
+		/*capability "Water Sensor"
 		capability "Motion Sensor"
 		capability "Smoke Detector"
-		
+		*/
+        
 		attribute "primaryStatus", "string"
 		attribute "lastCheckin", "string"
 		attribute "lastOpen", "string"

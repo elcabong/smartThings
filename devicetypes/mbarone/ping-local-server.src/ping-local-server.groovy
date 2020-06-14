@@ -71,12 +71,12 @@ metadata {
 def parse(description) {
     log.debug "parse starting"
     def msg = parseLanMessage(description)
-	//log.debug msg.json
+	log.debug msg.json
 	//def cmds = []
 	//cmds << "delay 1000"
 	
 	msg.json.each {
-		//log.debug "item: $it.ip is $it.status"
+		log.debug "item: $it.ip is $it.status"
 		changeChildValue(it.ip, it.status)
 		//cmds
 	}
@@ -104,7 +104,7 @@ def poll() {
 		)
     log.debug "hubaction is: " + hubAction
     
-    hubAction
+    //hubAction
 	sendHubCommand(hubAction)
 }
 
@@ -144,6 +144,12 @@ private String convertPortToHex(port) {
 					log.debug e
 				}
 			}
+            //if (childDevice != null) {
+                //log.debug "parse() found child device ${childDevice.deviceNetworkId}"
+                //log.debug "sending parse(${deviceType} ${value})"
+            //    childDevice.parse("${deviceType} ${value}")
+            //    log.debug "${childDevice.deviceNetworkId} - name: ${name} (switch), value: ${value}"
+            //}
 		}
 	}
 	catch (e) {

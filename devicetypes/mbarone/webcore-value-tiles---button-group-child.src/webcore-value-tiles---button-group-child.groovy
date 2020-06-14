@@ -1,5 +1,5 @@
 /**
- *  webCoRE Value Ties - Ave Temperature Group Child
+ *  webCoRE Value Ties - Button Group Child
  *
  *  Copyright 2017 Daniel Ogorchock
  *
@@ -23,35 +23,46 @@
  * 
  */
 metadata {
-	definition (name: "webCoRE Value Ties - Ave Temperature Group Child", namespace: "mbarone", author: "mbarone", vid:"generic-motion") {
-		capability "Temperature Measurement"
+	definition (name: "webCoRE Value Tiles - Button Group Child", namespace: "mbarone/apps", author: "mbarone", vid:"generic-switch") {
+		capability "Actuator"
 		capability "Sensor"
+		capability "Switch"
 		capability "Health Check"
 
-		attribute "lastUpdated", "String"
+		command "sendData"
 	}
 
+	simulator {
+		status "on": "switch:on"
+		status "off": "switch:off"
+	}
 	tiles(scale: 2) {
-		multiAttributeTile(name:"temperatureChild", type: "generic"){
-			tileAttribute ("temperature", key: "PRIMARY_CONTROL") {
-				attributeState("temperature", label:'${currentValue}°', icon: "st.alarm.temperature.normal",
-					backgroundColors:[
-						[value: 31, color: "#153591"],
-						[value: 44, color: "#1e9cbb"],
-						[value: 59, color: "#90d2a7"],
-						[value: 74, color: "#44b621"],
-						[value: 84, color: "#f1d801"],
-						[value: 95, color: "#d04e00"],
-						[value: 96, color: "#bc2323"]
-					]
-				)
-            }
+		multiAttributeTile(name:"switch", type: "lighting", width: 3, height: 4, canChangeIcon: true){
+			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+				attributeState "off", label: '${name}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"on"
+				attributeState "on", label: '${name}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#00A0DC", nextState:"off"
+			}
  			tileAttribute("device.lastUpdated", key: "SECONDARY_CONTROL") {
     				attributeState("default", label:'    Last updated ${currentValue}',icon: "st.Health & Wellness.health9")
             }
-        }
+		}
 	}
 
+}
+
+
+def installed() {
+    initialize()
+}
+
+def updated() {
+    initialize()
+}
+
+def initialize() {
+    sendEvent(name: "DeviceWatch-DeviceStatus", value: "online")
+    sendEvent(name: "healthStatus", value: "online")
+    sendEvent(name: "DeviceWatch-Enroll", value: [protocol: "cloud", scheme:"untracked"].encodeAsJson(), displayed: false)
 }
 
 def parse(String description) {
@@ -73,5 +84,28 @@ def parse(String description) {
     }
 }
 
-def installed() {
+
+def on() {
+    sendData("on")
+	sendEvent(name: "switch", value: "on")
+    def nowDay = new Date().format("MMM dd", location.timeZone)
+    def nowTime = new Date().format("h:mm a", location.timeZone)
+    sendEvent(name: "lastUpdated", value: nowDay + " at " + nowTime, displayed: false)
+}
+
+def off() {
+    sendData("off")
+	sendEvent(name: "switch", value: "off")
+    def nowDay = new Date().format("MMM dd", location.timeZone)
+    def nowTime = new Date().format("h:mm a", location.timeZone)
+    sendEvent(name: "lastUpdated", value: nowDay + " at " + nowTime, displayed: false)	
+}
+
+def sendData(String value) {
+    def name = device.displayName
+	//log.debug "sendData (${name}  ${value}) called"
+   // parent.sendEvent(name:"${name}", value: "${value}")
+	parent.sendEvent(name:"${name}", value: "${value}")
+	parent.sendEvent(name:"Child", value: "${name}, ${value}", displayed: false)
+    parent.sendEvent(name:"Details", value:"", displayed: false)
 }
