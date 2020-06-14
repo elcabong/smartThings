@@ -23,7 +23,7 @@
  *
  */
 metadata {
- 	definition (name: "webCoRE Value Tiles - Button Group Master", namespace: "mbarone", author: "mbarone", vid:"generic-switch") {
+ 	definition (name: "webCoRE Value Tiles Button Group Master", namespace: "mbarone", author: "mbarone", vid:"generic-switch") {
 		capability "Sensor"
 		capability "Switch"
 		capability "Health Check"
