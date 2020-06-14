@@ -23,7 +23,7 @@
  *
  */
 metadata {
- 	definition (name: "webCoRE Value Tiles Contact Sensor Group Master", namespace: "mbarone", author: "mbarone", mnmn: "SmartThings", mcdSync: true) {
+ 	definition (name: "webCoRE Value Tiles Contact Sensor Group Master", namespace: "mbarone", author: "mbarone", mnmn: "SmartThings", mcdSync: true, vid:"generic-contact") {
 		capability "Contact Sensor"
 		capability "Sensor"
 		capability "Switch"
