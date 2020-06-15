@@ -25,7 +25,7 @@
  *
  */
 metadata {
- 	definition (name: "webCoRE Value Tiles Ave Temperature Group Master", namespace: "mbarone", author: "mbarone", ocfDeviceType: "oic.d.thermostat", mcdSync: true, mnmn: "SmartThings", vid: "generic-radiator-thermostat-2") {
+ 	definition (name: "webCoRE Value Tiles Ave Temperature Group Master", namespace: "mbarone", author: "mbarone", ocfDeviceType: "oic.d.thermostat", mcdSync: true, mnmn: "SmartThings") {
 		capability "Temperature Measurement"
 		capability "Sensor"
 		capability "Switch"
